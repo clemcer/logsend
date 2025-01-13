@@ -1,14 +1,10 @@
-
 containers:
-  - "dozzle"
-  - "hrconvert2"
+  - "container1"
+  - "container2"
 keywords:
-  - "HTTP"
-  - apache
-  - "200"
-  - "404"
-ntfy:
+  - "keyword1"
+  - "keyword2"
   url: "http://192.168.178.184:82"
-  topic: "loggify"
-  token: "tk_hjqbstpw4950s0tq466p2nlwnk3k4"
+  topic: "logsend"
+  token: ""
 

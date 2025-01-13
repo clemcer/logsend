@@ -9,7 +9,7 @@ from datetime import datetime
 
 # Logging-Konfiguration
 logging.basicConfig(
-    level=logging.DEBUG,  # Ändere dies von INFO zu DEBUG
+    level=logging.INFO,  # Ändere dies von INFO zu DEBUG
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler("monitor.log", mode="w"),
@@ -90,7 +90,7 @@ def monitor_container_logs(container, keywords, config, timeout=30):
             try:
                 # Stelle sicher, dass log_line_decoded ein String ist
                 log_line_decoded = str(log_line.decode("utf-8")).strip()
-                logging.info("[%s] %s", container.name, log_line_decoded)
+                #logging.info("[%s] %s", container.name, log_line_decoded)
 
                 # Prüfe ob log_line_decoded nicht leer ist
                 if log_line_decoded:
