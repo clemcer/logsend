@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 COPY config.yaml .
 COPY test.py .
+COPY request_test.py .
 
 # Setze Standard-Umgebungsvariablen (optional, können aber beim Start überschrieben werden)
 #ENV NTFY_URL="https://ntfy.sh"
