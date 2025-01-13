@@ -1,14 +1,12 @@
 
 containers:
-  - dozzle
-  - hrconvert2
-  - ca36c05d2a80
-  - 9c7a0dc32fdc
+  - "dozzle"
+  - "hrconvert2"
 keywords:
   - "HTTP"
   - apache
-  - 200
-  - 404
+  - "200"
+  - "404"
 ntfy:
   url: "http://192.168.178.184:82"
   topic: "loggify"
