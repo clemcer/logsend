@@ -1,0 +1,21 @@
+2025-01-13 19:16:34,329 - INFO - Log-Monitor gestartet.
+2025-01-13 19:16:34,331 - INFO - Konfigurationsdatei erfolgreich geladen.
+2025-01-13 19:16:34,332 - DEBUG - Starting new HTTP connection (1): 192.168.178.184:82
+2025-01-13 19:16:34,347 - DEBUG - http://192.168.178.184:82 "POST /loggify HTTP/1.1" 200 188
+2025-01-13 19:16:34,347 - INFO - Ntfy-Benachrichtigung erfolgreich gesendet: Das Programm läuft und überwacht Container.
+2025-01-13 19:16:34,347 - DEBUG - Trying paths: ['/home/clems/.docker/config.json', '/home/clems/.dockercfg']
+2025-01-13 19:16:34,347 - DEBUG - No config file found
+2025-01-13 19:16:34,348 - DEBUG - Trying paths: ['/home/clems/.docker/config.json', '/home/clems/.dockercfg']
+2025-01-13 19:16:34,348 - DEBUG - No config file found
+2025-01-13 19:16:34,356 - DEBUG - http://localhost:None "GET /version HTTP/1.1" 200 822
+2025-01-13 19:16:34,359 - DEBUG - http://localhost:None "GET /v1.47/containers/json?limit=-1&all=0&size=0&trunc_cmd=0 HTTP/1.1" 200 None
+2025-01-13 19:16:34,364 - DEBUG - http://localhost:None "GET /v1.47/containers/2f1b0d22e361bb116a5f798739e059dc848e12ffb480e8777f47c943e4441ac0/json HTTP/1.1" 200 None
+2025-01-13 19:16:34,366 - DEBUG - http://localhost:None "GET /v1.47/containers/ca36c05d2a803af32563dcb0292e3be407a27709a09d9eb53cb2ef8e9a11b31e/json HTTP/1.1" 200 None
+2025-01-13 19:16:34,369 - DEBUG - http://localhost:None "GET /v1.47/containers/9c7a0dc32fdce418772941736a15121585e42e569b5a496e941cc27ca76ff795/json HTTP/1.1" 200 None
+2025-01-13 19:16:34,369 - INFO - Ausgewählte Container zur Überwachung: ['hrconvert2', 'dozzle']
+2025-01-13 19:16:34,373 - DEBUG - http://localhost:None "GET /v1.47/containers/ca36c05d2a803af32563dcb0292e3be407a27709a09d9eb53cb2ef8e9a11b31e/logs?stderr=1&stdout=1&timestamps=0&follow=1&tail=all&since=1736792194 HTTP/1.1" 200 None
+2025-01-13 19:16:34,375 - DEBUG - http://localhost:None "GET /v1.47/containers/9c7a0dc32fdce418772941736a15121585e42e569b5a496e941cc27ca76ff795/logs?stderr=1&stdout=1&timestamps=0&follow=1&tail=all&since=1736792194 HTTP/1.1" 200 None
+2025-01-13 19:16:34,377 - DEBUG - http://localhost:None "GET /v1.47/containers/ca36c05d2a803af32563dcb0292e3be407a27709a09d9eb53cb2ef8e9a11b31e/json HTTP/1.1" 200 None
+2025-01-13 19:16:34,378 - DEBUG - http://localhost:None "GET /v1.47/containers/9c7a0dc32fdce418772941736a15121585e42e569b5a496e941cc27ca76ff795/json HTTP/1.1" 200 None
+2025-01-13 19:16:34,379 - INFO - Starte Überwachung für Container: hrconvert2
+2025-01-13 19:16:34,379 - INFO - Starte Überwachung für Container: dozzle

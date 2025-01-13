@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  loggify:
+    container_name: loggify
+    build: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    #  - /home/clems/Downloads/Docker/appdata/loggify/config.yaml:/app/config.yaml
+    #environment:
+     # NTFY_URL: "https://192.168.178,184:82"
+      #NTFY_TOPIC: "loggify"ä
+
