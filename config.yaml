@@ -1,14 +1,12 @@
-ntfy:
-  url: "https://ntfy.sh"
-  topic: "alerts"
-  token: ""
-  priority: "default"
 
-monitoring:
-  containers:
-    - "api-service"
-    - "worker-service"
-  keywords:
-    - "exception"
-    - "timeout"
-    - "unauthorized"
+containers:
+  - dozzle
+  - hrconvert2
+keywords:
+  - HTTP
+  - apache
+ntfy:
+  url: "https://192.168.178.184:82"
+  topic: "loggify"
+  token: "tk_hjqbstpw4950s0tq466p2nlwnk3k4"
+
