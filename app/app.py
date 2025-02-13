@@ -140,7 +140,7 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
     local_keywords_with_file = keywords_with_file.copy()
 
     processor = LogProcessor(config, container.name, local_keywords, local_keywords_with_file, timeout=1)  
-    processor.initialize_thread()
+    
     try:
         log_stream = container.logs(stream=True, follow=True, since=now)
         logging.info("Monitoring for Container started: %s", container.name)
@@ -152,7 +152,7 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
                 break
             try:
                 log_line_decoded = str(log_line.decode("utf-8")).strip()
-                logging.debug(f"Log-Line: {log_line_decoded}")
+                #logging.debug(f"Log-Line: {log_line_decoded}")
                 if log_line_decoded:
                     if processor.pattern == "":
                         processor.find_pattern(log_line_decoded)

@@ -78,11 +78,18 @@ def send_ntfy_notification(config, container_name, message, keyword=None, file_n
             logging.debug("Message WITH file is being sent")
             headers["Filename"] = file_name
             with open(file_name, "rb") as file:
-                response = requests.post(
-                    f"{ntfy_url}/{ntfy_topic}?message={urllib.parse.quote(message_text)}",
-                    data=file,
-                    headers=headers
-                )
+                if len(message_text) < 199:
+                    response = requests.post(
+                        f"{ntfy_url}/{ntfy_topic}?message={urllib.parse.quote(message_text)}",
+                        data=file,
+                        headers=headers
+                    )
+                else:
+                    response = requests.post(
+                        f"{ntfy_url}/{ntfy_topic}",
+                        data=file,
+                        headers=headers
+                    )
         else:
             logging.debug("Message WITHOUT file is being sent")
             response = requests.post(

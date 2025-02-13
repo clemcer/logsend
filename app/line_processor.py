@@ -45,12 +45,13 @@ class LogProcessor:
         self.local_keywords = keywords.copy()
         self.local_keywords_with_file = keywords_with_file.copy()
 
+        self._set_keywords()
         # Starte Hintergrund-Thread für Timeout
         self.flush_thread = Thread(target=self._check_flush)
         self.flush_thread.daemon = True
         self.flush_thread.start()
     
-    def initialize_thread(self):
+    def _set_keywords(self):
         if isinstance(self.config["containers"][self.container_name], list):
             self.local_keywords.extend(self.config["containers"][self.container_name])
         elif isinstance(self.config["containers"][self.container_name], dict):
@@ -59,7 +60,7 @@ class LogProcessor:
             if "keywords" in self.config["containers"][self.container_name]:
                 self.local_keywords.extend(self.config["containers"][self.container_name]["keywords"])
         else:
-            logging.error("Error in config: not a list or dict not  properly configured with keywords_with_attachment and keywords attributes")
+            logging.error(f"{self.container_name}: Error in config: keywords or keywords_with_attachment not found")
         
         for keyword in self.local_keywords + self.local_keywords_with_file:
             if isinstance(keyword, dict) and keyword.get("regex") is not None:
@@ -70,15 +71,22 @@ class LogProcessor:
 
     def find_pattern(self, line):
         patterns = [
-            r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}",
-            r"\[(INFO|ERROR|DEBUG|WARN)\]",
-            r"\(INFO|ERROR|DEBUG|WARN\)",
+            r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}",                           # 2025-02-13 16:36:02
+            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z",                            # ISO 8601 - 2025-02-13T16:36:02Z
+            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})",         # ISO 8601 with Timezone Offset - 2025-02-13T16:36:02+00:00
+            r"(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])-\d{4} \d{2}:\d{2}:\d{2}",     # 02-13-2025 16:36:02
+            r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}, \d{4} \d{2}:\d{2}:\d{2}",  # Feb 13, 2025 16:36:02
+            r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{1,2}\s\d{2}:\d{2}:\d{2}\sGMT[+-]\d{2}:\d{2}\s\d{4}",  # Thu Feb 13 17:37:32 GMT+01:00 2025
+            r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}\.\d{6}",                     # 2025/02/13 17:18:50.410540
+            r"\[(INFO|ERROR|DEBUG|WARN)\]",                                    # Log-Level in square brackets, e.g. [INFO]
+            r"\(INFO|ERROR|DEBUG|WARN\)",                                      # Log-Level in round brackets, e.g. (INFO)
+            r"(?i)\b(INFO|ERROR|DEBUG|WARNING|CRITICAL)\b"                     # Log-Level as a single word, case-insensitive
         ]
         if self.pattern == "":
-            logging.debug("Searching for pattern")
+           # logging.debug("Searching for pattern")
             for pattern in patterns:
-                if re.match(line, pattern):
-                    logging.debug(f"Found pattern: {pattern}")
+                if re.search(pattern, line):
+                    #logging.debug(f"Found pattern: {pattern}")
                     self.pattern = pattern
                     break
 
@@ -91,8 +99,8 @@ class LogProcessor:
 
     def process_multi_line(self, line):
         with self.lock:
-            if re.search(line, self.pattern):
-                logging.debug(f"Found pattern in line: {line}, \nThis is a new line")
+            if re.search(self.pattern, line):
+                #logging.debug(f"Found pattern in line: {line}, \nThis is a new line")
                 if self.buffer:
                     self._handle_and_clear_buffer()
                 self.buffer.append(line)
@@ -106,18 +114,18 @@ class LogProcessor:
 
     def _handle_and_clear_buffer(self):
         message = "\n".join(self.buffer)
-        logging.debug(f"MESSAGE: \n{message}\nMESSAGE END")
+        #logging.debug(f"MESSAGE: \n{message}\nMESSAGE END")
         self._search_and_send(message)
         self.buffer.clear()
 
 
 
     def _search_and_send(self, log_line):
-        logging.debug(f"Searching for keywords in: {log_line}, {self.local_keywords}, {self.local_keywords_with_file}")
+        #logging.debug(f"Searching for keywords in: {log_line}, {self.local_keywords}, {self.local_keywords_with_file}")
         for keyword in self.local_keywords + self.local_keywords_with_file:
             if isinstance(keyword, dict) and keyword.get("regex") is not None:
                 regex_keyword = keyword["regex"]
-                logging.debug(f"Searching for regex-keyword: {regex_keyword}")
+                #logging.debug(f"Searching for regex-keyword: {regex_keyword}")
                 if time.time() - self.time_per_keyword.get(regex_keyword) >= int(self.notification_cooldown):
                     if re.search(regex_keyword, log_line, re.IGNORECASE):
                         if keyword in self.local_keywords_with_file:
@@ -130,7 +138,7 @@ class LogProcessor:
                         self.time_per_keyword[regex_keyword] = time.time()
 
             elif str(keyword).lower() in log_line.lower():
-                logging.debug(f"Searching for keyword: {keyword}")
+              #  logging.debug(f"Searching for keyword: {keyword}")
                 if time.time() - self.time_per_keyword.get(keyword) >= int(self.notification_cooldown):
                     if keyword in self.local_keywords_with_file:
                         logging.info(f"Keyword (with attachment) '{keyword}' was found in {self.container_name}: {log_line}") 
