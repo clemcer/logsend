@@ -11,12 +11,13 @@ from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from notifier import send_notification
+from line_processor import LogProcessor
 
 
 shutdown_event = threading.Event()
 
 def set_logging(config):
-    log_level = os.getenv("LOG_LEVEL", config.get("settings", {}).get("log-level", "INFO")).upper()
+    log_level = os.getenv("LOG_LEVEL", config.get("settings", {}).get("log-level", "DEBUG")).upper()
     logging.getLogger().handlers.clear()
     logging.basicConfig(
         level = getattr(logging, log_level.upper(), logging.INFO),
@@ -50,7 +51,7 @@ def load_config():
     """
     config = {}
     try:
-        with open("config.yaml", "r") as file:
+        with open("/data/clems/Meine Dateien/PROJECTS/loggify/app/config.yaml", "r") as file:
             config = yaml.safe_load(file)
             logging.info("Konfigurationsdatei erfolgreich geladen.")
     except FileNotFoundError:
@@ -132,33 +133,13 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
     Überwacht die Logs eines Containers und sendet Benachrichtigungen bei Schlüsselwörtern.
     """
     now = datetime.now()
-    start_time = 0
     keyword_notification_cooldown = os.getenv("keyword_notification_cooldown", config.get("settings", {}).get("keyword_notification_cooldown", 10))
     logging.debug(f"keyword_notification_cooldown: {keyword_notification_cooldown}")
     local_keywords = keywords.copy()
     local_keywords_with_file = keywords_with_file.copy()
 
+    processor = LogProcessor(config, container.name, local_keywords, local_keywords_with_file, timeout=1)  
 
-    if isinstance(config["containers"][container.name], list):
-        local_keywords.extend(config["containers"][container.name])
-    elif isinstance(config["containers"][container.name], dict):
-        if "keywords_with_attachment" in config["containers"][container.name]:
-            local_keywords_with_file.extend(config["containers"][container.name]["keywords_with_attachment"])
-        if "keywords" in config["containers"][container.name]:
-            local_keywords.extend(config["containers"][container.name]["keywords"])
-    else:
-        logging.error("Error in config: not a list or dict not  properly configured with keywords_with_attachment and keywords attributes")
-
-    logging.debug(f"{container.name} - Keywords: {local_keywords}, keywords with attachment: {local_keywords_with_file}")
-
-    time_per_keyword = { }
-    for keyword in local_keywords + local_keywords_with_file:
-        if isinstance(keyword, dict) and keyword.get("regex") is not None:
-            time_per_keyword[keyword["regex"]] = 0
-        else:
-            time_per_keyword[keyword] = 0
-    logging.debug(f"{container.name}: time_per_keyword: {time_per_keyword}")
-    logging.debug(f"starting log stream for {container.name}")
     try:
         log_stream = container.logs(stream=True, follow=True, since=now)
         logging.info("Monitoring for Container started: %s", container.name)
@@ -170,35 +151,10 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
                 break
             try:
                 log_line_decoded = str(log_line.decode("utf-8")).strip()
-                #logging.debug("[%s] %s", container.name, log_line_decoded)
                 if log_line_decoded:
-                    log_line_lower = log_line_decoded.lower()
-                    for keyword in local_keywords + local_keywords_with_file:
-                        if isinstance(keyword, dict) and keyword.get("regex") is not None:
-                            regex_keyword = keyword["regex"]
-                            if time.time() - time_per_keyword.get(regex_keyword) >= int(keyword_notification_cooldown):
-                                if re.search(regex_keyword, log_line_decoded, re.IGNORECASE):
-                                    if keyword in local_keywords_with_file:
-                                        logging.info(f"Regex-Keyword (with attachment) '{regex_keyword}' was found in {container.name}: {log_line_decoded}")
-                                        file_name = log_attachment(container)
-                                        send_notification(config, container.name, log_line_decoded, regex_keyword, file_name)
-                                    else:
-                                        send_notification(config, container.name, log_line_decoded, regex_keyword)
-                                        logging.info(f"Regex-Keyword '{keyword}' was found in {container.name}: {log_line_decoded}")
-                                    time_per_keyword[regex_keyword] = time.time()
-                                    logging.info(f"waiting {start_time - time.time()} for {regex_keyword}")
-
-                        elif str(keyword).lower() in log_line_lower:
-                            if time.time() - time_per_keyword.get(keyword) >= int(keyword_notification_cooldown):
-                                if keyword in local_keywords_with_file:
-                                    logging.info(f"Keyword (with attachment) '{keyword}' was found in {container.name}: {log_line_decoded}") 
-                                    file_name = log_attachment(container)
-                                    send_notification(config, container.name, log_line_decoded, keyword, file_name)
-                                else:
-                                    send_notification(config, container.name, log_line_decoded, keyword)
-                                    logging.info(f"Keyword '{keyword}' was found in {container.name}: {log_line_decoded}") 
-                                time_per_keyword[keyword] = time.time()
-
+                    if processor.pattern == "":
+                        processor.find_pattern(log_line_decoded)
+                    processor.process_multi_line(log_line_decoded)
             except UnicodeDecodeError:
                 logging.warning("Fehler beim Dekodieren einer Log-Zeile von %s", container.name)
     except docker.errors.APIError as e:
@@ -258,10 +214,11 @@ def monitor_docker_logs(config):
         threads.append(thread)
         thread.start()
 
-    if bool(os.getenv("DISABLE_RESTART", config.get("settings", {}).get("disable_restart", False))) == False:
-        thread_file_change = threading.Thread(target=detect_config_changes)
-        threads.append(thread_file_change)
-        thread_file_change.start()
+
+    # if bool(os.getenv("DISABLE_RESTART", config.get("settings", {}).get("disable_restart", False))) == False:
+    #     thread_file_change = threading.Thread(target=detect_config_changes)
+    #     threads.append(thread_file_change)
+    #     thread_file_change.start()
 
     logging.info("Monitoring started for all selected containers. Monitoring docker events now to watch for new containers")
 

@@ -116,6 +116,6 @@ def send_notification(config, container_name, message, keyword=None, file_name=N
         else:
             logging.debug(f"Die Datei {file_name} existiert nicht.")
     
-    if not ntfy_url or not ntfy_token or not apprise_url:
-        logging.error("No notification service configured. You can not receive notifications at the moment.")
+    # if not ntfy_url or not ntfy_token or not apprise_url:
+    #     logging.error("No notification service configured. You can not receive notifications at the moment.")
     
