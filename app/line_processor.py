@@ -113,9 +113,11 @@ class LogProcessor:
 
 
     def _search_and_send(self, log_line):
+        logging.debug(f"Searching for keywords in: {log_line}, {self.local_keywords}, {self.local_keywords_with_file}")
         for keyword in self.local_keywords + self.local_keywords_with_file:
             if isinstance(keyword, dict) and keyword.get("regex") is not None:
                 regex_keyword = keyword["regex"]
+                logging.debug(f"Searching for regex-keyword: {regex_keyword}")
                 if time.time() - self.time_per_keyword.get(regex_keyword) >= int(self.notification_cooldown):
                     if re.search(regex_keyword, log_line, re.IGNORECASE):
                         if keyword in self.local_keywords_with_file:
@@ -128,6 +130,7 @@ class LogProcessor:
                         self.time_per_keyword[regex_keyword] = time.time()
 
             elif str(keyword).lower() in log_line.lower():
+                logging.debug(f"Searching for keyword: {keyword}")
                 if time.time() - self.time_per_keyword.get(keyword) >= int(self.notification_cooldown):
                     if keyword in self.local_keywords_with_file:
                         logging.info(f"Keyword (with attachment) '{keyword}' was found in {self.container_name}: {log_line}") 
@@ -152,8 +155,8 @@ class LogProcessor:
             return file_name
 
     def _send_message(self, message, keyword, file_name=None):
-        logging.debug(f"GESENDET: \n{message}\nNACHRICHT ENDE")
-        send_notification(self.config, self.container_name, self.message, keyword, file_name)       
+        logging.debug(f"SENDE NACHRICHT: \n{message}\nNACHRICHT ENDE")
+        send_notification(self.config, self.container_name, message, keyword, file_name)       
 
 
 

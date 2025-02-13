@@ -18,6 +18,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY icon.png .
 COPY app/notifier.py .
 COPY app/app.py .
+COPY app/line_processor.py .
+
 
 
 

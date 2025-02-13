@@ -17,10 +17,11 @@ from line_processor import LogProcessor
 shutdown_event = threading.Event()
 
 def set_logging(config):
-    log_level = os.getenv("LOG_LEVEL", config.get("settings", {}).get("log-level", "DEBUG")).upper()
+    log_level = os.getenv("LOG_LEVEL", config.get("settings", {}).get("log-level", "INFO")).upper()
     logging.getLogger().handlers.clear()
     logging.basicConfig(
         level = getattr(logging, log_level.upper(), logging.INFO),
+       # level = "DEBUG",
         format="%(asctime)s - %(levelname)s - %(message)s",
         handlers=[
             logging.FileHandler("monitor.log", mode="w"),
@@ -51,7 +52,7 @@ def load_config():
     """
     config = {}
     try:
-        with open("/data/clems/Meine Dateien/PROJECTS/loggify/app/config.yaml", "r") as file:
+        with open("/app/config.yaml", "r") as file:
             config = yaml.safe_load(file)
             logging.info("Konfigurationsdatei erfolgreich geladen.")
     except FileNotFoundError:
@@ -139,7 +140,7 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
     local_keywords_with_file = keywords_with_file.copy()
 
     processor = LogProcessor(config, container.name, local_keywords, local_keywords_with_file, timeout=1)  
-
+    processor.initialize_thread()
     try:
         log_stream = container.logs(stream=True, follow=True, since=now)
         logging.info("Monitoring for Container started: %s", container.name)
@@ -151,6 +152,7 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
                 break
             try:
                 log_line_decoded = str(log_line.decode("utf-8")).strip()
+                logging.debug(f"Log-Line: {log_line_decoded}")
                 if log_line_decoded:
                     if processor.pattern == "":
                         processor.find_pattern(log_line_decoded)
@@ -215,10 +217,10 @@ def monitor_docker_logs(config):
         thread.start()
 
 
-    # if bool(os.getenv("DISABLE_RESTART", config.get("settings", {}).get("disable_restart", False))) == False:
-    #     thread_file_change = threading.Thread(target=detect_config_changes)
-    #     threads.append(thread_file_change)
-    #     thread_file_change.start()
+    if bool(os.getenv("DISABLE_RESTART", config.get("settings", {}).get("disable_restart", False))) == False:
+        thread_file_change = threading.Thread(target=detect_config_changes)
+        threads.append(thread_file_change)
+        thread_file_change.start()
 
     logging.info("Monitoring started for all selected containers. Monitoring docker events now to watch for new containers")
 
