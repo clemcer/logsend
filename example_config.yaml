@@ -238,12 +238,12 @@ ntfy:
 # Additional settings for Logsend system.
 ###############################################################################
 settings:
-  log-level: INFO
-  # Cooldown (in seconds) to avoid sending repeated notifications for the same keyword.
-  keyword_notification_cooldown: 5
+  log-level: INFO                 # Cooldown (in seconds) to avoid sending repeated notifications for the same keyword.
+  notification_cooldown: 5
   attachment_lines: 50
   disable_start_message: False
   disable_shutdown_message: False
+  disable_restart_message: False
 
 ###############################################################################
 # End of Configuration

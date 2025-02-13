@@ -82,6 +82,8 @@ def load_config():
 
 
 def restart_docker_container():
+    if bool(os.getenv("DISABLE_RESTART_MESSAGE", config.get("settings", {}).get("disable_restart_message", False))) == False:
+        send_notification(config, "Loggifly:", "Config Change detected. The programm is restarting.")
     logging.debug("restart_docker_container function was called")
     time.sleep(5)
     client = docker.from_env()
@@ -116,18 +118,6 @@ def detect_config_changes():
         observer.join()
 
 
-def log_attachment(container):
-    if isinstance(config.get("containers").get(container.name, {}), dict):
-        lines = int(config.get("containers", {}).get(container.name, {}).get("attachment_lines") or os.getenv("ATTACHMENT_LINES", config.get("settings", {}).get("attachment_lines", 50)))
-    else:
-        lines = int(os.getenv("ATTACHMENT_LINES", config.get("settings", {}).get("attachment_lines", 50)))
-
-    file_name = f"last_{lines}_lines_from_{container.name}.log"
-
-    log_tail = container.logs(tail=lines).decode("utf-8")
-    with open(file_name, "w") as file:  
-        file.write(log_tail)
-        return file_name
 
 def monitor_container_logs(config, client, container, keywords, keywords_with_file):
     """
@@ -154,8 +144,6 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
                 log_line_decoded = str(log_line.decode("utf-8")).strip()
                 #logging.debug(f"Log-Line: {log_line_decoded}")
                 if log_line_decoded:
-                    if processor.pattern == "":
-                        processor.find_pattern(log_line_decoded)
                     processor.process_multi_line(log_line_decoded)
             except UnicodeDecodeError:
                 logging.warning("Fehler beim Dekodieren einer Log-Zeile von %s", container.name)

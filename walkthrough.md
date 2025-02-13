@@ -102,12 +102,15 @@ These are the global settings you can set via docker environment variables in ei
 | **NTFY_TOPIC**                    | Notification topic for ntfy.                             | _N/A_  |
 | **NTFY_TAGS**                     | Ntfy [Tags/Emojis](https://docs.ntfy.sh/emojis/) for ntfy notifications.                 | warning  |
 | **NTFY_PRIORITY**                 | Notification [priority](https://docs.ntfy.sh/publish/?h=priori#message-priority) for ntfy messages.                 | 3 / default |
-| **KEYWORD_NOTIFICATION_COOLDOWN** | Cooldown period (in seconds) per container per keyword before a new message can be sent  | 5        |
+| **NOTIFICATION_COOLDOWN** | Cooldown period (in seconds) per container per keyword before a new message can be sent  | 5        |
 | **LOG_LEVEL**                     | Log Level for Loggifly container logs.                    | INFO     |
-| **DISBLE_START_MESSAGE**          | Disable startup message.                                  | False     |
-| **DISBLE_SHUTDOWN_MESSAGE**       | Disable shutdown message.                                 | False     |
 | **ATTACHMENT_LINES**              | Define the number of Log Lines in the attachment file     | False     |
 | **DISABLE_RESTART**               | Disable automatic restarts when the config file is changed.| False     |
+| **DISBLE_START_MESSAGE**          | Disable startup message.                                  | False     |
+| **DISBLE_SHUTDOWN_MESSAGE**       | Disable shutdown message.                                 | False     |
+| **DISABLE_RESTART_MESSAGE**       | Disable message on config change when programm restarts.| False     |
+
+
 
 ---
 

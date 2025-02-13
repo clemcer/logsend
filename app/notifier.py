@@ -12,6 +12,7 @@ def send_apprise_notification(url, container_name, message, keyword=None, file_n
     apobj = apprise.Apprise()
 
     apobj.add(url)
+    message = ("This message had to be shortened: \n" if len(message) > 1900 else "") + message[:1900]
 
     if keyword is None:
         title = f"{container_name}"

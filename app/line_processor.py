@@ -9,26 +9,6 @@ from notifier import send_notification
 
 logging.getLogger(__name__)
 
-# logging.basicself.config(
-#         level = "INFO",
-#         format="%(asctime)s - %(levelname)s - %(message)s",
-#         handlers=[
-#             logging.FileHandler("monitor.log", mode="w"),
-#             logging.StreamHandler()
-#         ]
-#     )
-
-# logging.debug("This is a Debug-Message")
-# logging.info("This is a Info-Message")
-# logging.warning("This is a Warning-Message")
-
-
-
-# # Docker-Client initialisieren
-# client = docker.from_env()
-# container = client.containers.get("vg-backend")
-# logging
-
 class LogProcessor:
     def __init__(self, config, container_name, keywords, keywords_with_file, timeout=1):
         self.config = config
@@ -78,9 +58,14 @@ class LogProcessor:
             r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}, \d{4} \d{2}:\d{2}:\d{2}",  # Feb 13, 2025 16:36:02
             r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{1,2}\s\d{2}:\d{2}:\d{2}\sGMT[+-]\d{2}:\d{2}\s\d{4}",  # Thu Feb 13 17:37:32 GMT+01:00 2025
             r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}\.\d{6}",                     # 2025/02/13 17:18:50.410540
-            r"\[(INFO|ERROR|DEBUG|WARN)\]",                                    # Log-Level in square brackets, e.g. [INFO]
-            r"\(INFO|ERROR|DEBUG|WARN\)",                                      # Log-Level in round brackets, e.g. (INFO)
-            r"(?i)\b(INFO|ERROR|DEBUG|WARNING|CRITICAL)\b"                     # Log-Level as a single word, case-insensitive
+            r"\[(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\]",                        # Log-Level in square brackets, e.g. [INFO]
+            r"\(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL\)",                          # Log-Level in round brackets, e.g. (INFO)
+            r"(?i)\[(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\]",                    # Log-Level in square brackets, e.g. [INFO], case-insensitive
+            r"(?i)\(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL\)",                      # Log-Level in round brackets, e.g. (INFO), case-insensitive
+            r"(?i)\b(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\b",                     # Log-Level as a single word, case-insensitive
+            r"(?i)(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)"                     # Log-Level as a single word without word boundary, case-insensitive
+
+
         ]
         if self.pattern == "":
            # logging.debug("Searching for pattern")
@@ -88,7 +73,10 @@ class LogProcessor:
                 if re.search(pattern, line):
                     #logging.debug(f"Found pattern: {pattern}")
                     self.pattern = pattern
+                    logging.debug(f"{self.container_name}: Found pattern: {pattern}")
                     break
+                else:
+                    logging.debug(f"{self.container_name}: pattern ({pattern}) did not match")
 
     def _check_flush(self):
         while self.running:
@@ -98,6 +86,8 @@ class LogProcessor:
                     self._handle_and_clear_buffer()
 
     def process_multi_line(self, line):
+        if self.pattern == "":
+            self.find_pattern(line)
         with self.lock:
             if re.search(self.pattern, line):
                 #logging.debug(f"Found pattern in line: {line}, \nThis is a new line")
@@ -173,18 +163,3 @@ class LogProcessor:
         with self.lock:
             if self.buffer:
                 self._search_and_clear()
-
-# keywords = [move, test]
-# keywords_with_file = []
-# # Logs streamen und verarbeiten
-# processor = LogProcessor(config, container.name, keywords, keywords_with_file, timeout=1)  # Timeout in Sekunden
-
-# try:
-#     for line in container.logs(stream=True, follow=True):
-#         if processor.pattern == "":
-#             processor.find_pattern(line.decode("utf-8").strip())
-#         processor.process_multi_line(line.decode("utf-8").strip())
-# except KeyboardInterrupt:
-#     pass
-# finally:
-#     processor.stop()
