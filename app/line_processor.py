@@ -10,7 +10,8 @@ from notifier import send_notification
 logging.getLogger(__name__)
 
 class LogProcessor:
-    def __init__(self, config, container, keywords, keywords_with_file, timeout=1):
+    def __init__(self, config, container, keywords, keywords_with_file, shutdown_event, timeout=1):
+        self.shutdown_event = shutdown_event
         self.config = config
         self.container_name = container.name
         self.container = container
@@ -60,84 +61,94 @@ class LogProcessor:
     def _find_pattern(self):
         if not self.multi_line:
             return
-        
-        time_stamp_patterns = [
-            # Matches ISO 8601 with optional timezone and milliseconds
-            # Examples: "2025-02-13 16:36:02", "2025-02-13T16:36:02Z", "2025-02-13T16:36:02.123Z", "2025-02-13T16:36:02+01:00"
-            r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[Z+-]\d{2}:?\d{2}|\.\d{3,6}Z?)?",
+     #   count = 0
+        found_pattern_event = self.shutdown_event
+        while not self.shutdown_event.wait(timeout=300):
+         #   count += 1
+            time_stamp_patterns = [
+                # Matches ISO 8601 with optional timezone and milliseconds
+                # Examples: "2025-02-13 16:36:02", "2025-02-13T16:36:02Z", "2025-02-13T16:36:02.123Z", "2025-02-13T16:36:02+01:00"
+                r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[Z+-]\d{2}:?\d{2}|\.\d{3,6}Z?)?",
 
-            # Matches Unix epoch time (10-digit)
-            # Example: "1718292832"
-            r"\b\d{10}\b",
+                # Matches Unix epoch time (10-digit)
+                # Example: "1718292832"
+                r"\b\d{10}\b",
 
-            # Matches month names with optional suffixes and commas
-            # Examples: "Feb 13, 2025 16:36:02", "February 13 2025 16:36:02"
-            r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4} \d{2}:\d{2}:\d{2}",
+                # Matches month names with optional suffixes and commas
+                # Examples: "Feb 13, 2025 16:36:02", "February 13 2025 16:36:02"
+                r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4} \d{2}:\d{2}:\d{2}",
 
-            # Matches dates with separators (- or /) and optional month names
-            # Examples: "13-02-2025 16:36:02", "13/Feb/2025 16:36:02", "02-13-2025 16:36:02"
-            r"\d{1,2}[-/](?:0[1-9]|1[0-2]|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/]\d{4}[ :T]\d{1,2}:\d{2}:\d{2}",
+                # Matches dates with separators (- or /) and optional month names
+                # Examples: "13-02-2025 16:36:02", "13/Feb/2025 16:36:02", "02-13-2025 16:36:02"
+                r"\d{1,2}[-/](?:0[1-9]|1[0-2]|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/]\d{4}[ :T]\d{1,2}:\d{2}:\d{2}",
 
-            # Matches dates with slashes and optional commas
-            # Examples: "02/13/2025 16:36:02", "02/13/2025, 4:23:18 PM"
-            r"\d{2,4}/\d{2}/\d{2,4}[, ]\d{1,2}:\d{2}:\d{2}",
-        ]
+                # Matches dates with slashes and optional commas
+                # Examples: "02/13/2025 16:36:02", "02/13/2025, 4:23:18 PM"
+                r"\d{2,4}/\d{2}/\d{2,4}[, ]\d{1,2}:\d{2}:\d{2}",
+            ]
 
-        log_level_patterns = [
-            # Matches log levels in square or round brackets (case-insensitive)
-            # Examples: "[INFO]", "(ERROR)", "[WARNING]", "(debug)"
-            r"(?i)([\[\(])(INFO|ERROR|DEBUG|WARN(ING)?|CRITICAL)([\]\)])",
+            log_level_patterns = [
+                # Matches log levels in square or round brackets (case-insensitive)
+                # Examples: "[INFO]", "(ERROR)", "[WARNING]", "(debug)"
+                r"(?i)([\[\(])(INFO|ERROR|DEBUG|WARN(ING)?|CRITICAL)([\]\)])",
 
-            # Matches log levels as standalone words with context (case-insensitive)
-            # Examples: "INFO:", "ERROR ", "WARNING)", "DEBUG]"
-            r"(?i)\b(INFO|ERROR|DEBUG|WARN(ING)?|CRITICAL)\b(?=\s|:|\)|\])",
-        ]
+                # Matches log levels as standalone words with context (case-insensitive)
+                # Examples: "INFO:", "ERROR ", "WARNING)", "DEBUG]"
+                r"(?i)\b(INFO|ERROR|DEBUG|WARN(ING)?|CRITICAL)\b(?=\s|:|\)|\])",
+            ]
 
-        compiled_time_stamp_patterns = [re.compile(pattern) for pattern in time_stamp_patterns]
-        compiled_log_level_patterns = [re.compile(pattern) for pattern in log_level_patterns]
-        tmp_patterns = {pattern: 0 for pattern in compiled_time_stamp_patterns}
+            compiled_time_stamp_patterns = [re.compile(pattern) for pattern in time_stamp_patterns]
+            compiled_log_level_patterns = [re.compile(pattern) for pattern in log_level_patterns]
+            tmp_patterns = {pattern: 0 for pattern in compiled_time_stamp_patterns}
 
-        log_tail = self.container.logs(tail=100).decode("utf-8")
-        for line in log_tail.splitlines():
-            for pattern in compiled_time_stamp_patterns:
-                if pattern.search(line):
-                    tmp_patterns[pattern] += 1
-                    #logging.debug(f"container: {self.container_name}: Found pattern: {pattern} --- In line: {line}")
-                    break
-        sorted_patterns = sorted(tmp_patterns.items(), key=lambda x: x[1], reverse=True)
-        
-        total_lines = len(log_tail.splitlines())
-        threshold = max(5, int(total_lines * 0.1))
-
-        for pattern in sorted_patterns:
-            if pattern[1] > threshold:
-                self.patterns.append(pattern[0])
-                    
-        if self.patterns == []:
-            tmp_patterns = {pattern: 0 for pattern in compiled_log_level_patterns}
-
+            log_tail = self.container.logs(tail=100).decode("utf-8")
             for line in log_tail.splitlines():
-                for pattern in compiled_log_level_patterns:
+                for pattern in compiled_time_stamp_patterns:
                     if pattern.search(line):
                         tmp_patterns[pattern] += 1
                         #logging.debug(f"container: {self.container_name}: Found pattern: {pattern} --- In line: {line}")
                         break
+            sorted_patterns = sorted(tmp_patterns.items(), key=lambda x: x[1], reverse=True)
+            
+            total_lines = len(log_tail.splitlines())
+            threshold = max(5, int(total_lines * 0.1))
 
-        sorted_patterns = sorted(tmp_patterns.items(), key=lambda x: x[1], reverse=True)
-    
-        for pattern in sorted_patterns:
-            if pattern[1] > threshold:
-                self.patterns.append(pattern[0])
+            for pattern in sorted_patterns:
+                if pattern[1] > threshold:
+                    self.patterns.append(pattern[0])
+                        
+            if self.patterns == []:
+                tmp_patterns = {pattern: 0 for pattern in compiled_log_level_patterns}
 
-        logging.debug(f"container: {self.container_name}: Found patterns: {self.patterns}")
+                for line in log_tail.splitlines():
+                    for pattern in compiled_log_level_patterns:
+                        if pattern.search(line):
+                            tmp_patterns[pattern] += 1
+                            #logging.debug(f"container: {self.container_name}: Found pattern: {pattern} --- In line: {line}")
+                            break
 
-        if self.patterns == []:
-            self.multi_line = False
-            logging.debug(f"container: {self.container_name}: No pattern found in log. Switching to single-line mode.")
-        else:
-            self.multi_line = True
-            logging.debug(f"container: {self.container_name}: Found pattern(s) in log. Switching to multi-line mode.")
-  
+            sorted_patterns = sorted(tmp_patterns.items(), key=lambda x: x[1], reverse=True)
+        
+            for pattern in sorted_patterns:
+                if pattern[1] > threshold:
+                    self.patterns.append(pattern[0])
+
+            logging.debug(f"container: {self.container_name}: Found patterns: {self.patterns}")
+
+            if self.patterns == []:
+                self.multi_line = False
+                logging.debug(f"container: {self.container_name}: No pattern found in log. Mode: single-line.")
+            else:
+                self.multi_line = True
+                logging.debug(f"container: {self.container_name}: Found pattern(s) in log. Mode: multi-line.")
+                # break
+            # if count == 6:
+            #     logging.debug(f"container: {self.container_name}: No pattern found in log after 30 minutes. Switching to single-line mode.") 
+            #     break
+
+            logging.debug(f"container: {self.container_name}: Waiting 5 minutes to check again for patterns.")
+
+       # logging.debug(f"container: {self.container_name}: ending find_pattern thread")
 
     def _check_flush(self):
         while self.running:

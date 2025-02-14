@@ -29,7 +29,7 @@ def set_logging(config):
     )
     logging.info(f"Log-Level set to {log_level}")
     logging.debug("This is a Debug-Message")
-    logging.info("This is a Info-Message")
+    logging.info("This is an Info-Message")
     logging.warning("This is a Warning-Message")
 
 def handle_signal(signum, frame):
@@ -83,13 +83,9 @@ def load_config():
         "multi_line_entries": os.getenv("MULTI_LINE_ENTRIES", config.get("settings", {}).get("multi_line_entries", True)),
         "notification_cooldown": os.getenv("NOTIFICATION_COOLDOWN", config.get("settings", {}).get("notification_cooldown", 10))
     }
+ 
 
-
-        
-
-    logging.info(f"Multi-Line-Mode: {config['settings']['multi_line_entries']}")
-    logging.info(f"Notification-Cooldown: {config['settings']['notification_cooldown']}")
-
+    
     return config
 
 
@@ -138,7 +134,7 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
     local_keywords = keywords.copy()
     local_keywords_with_file = keywords_with_file.copy()
   
-    processor = LogProcessor(config, container, local_keywords, local_keywords_with_file, timeout=5)  
+    processor = LogProcessor(config, container, local_keywords, local_keywords_with_file, shutdown_event, timeout=5)  
     
     try:
         log_stream = container.logs(stream=True, follow=True, since=now)
@@ -243,6 +239,8 @@ if __name__ == "__main__":
     logging.info("Loggifly started")
     config = load_config()
     set_logging(config)
+    logging.info(f"Multi-Line-Mode: {config['settings']['multi_line_entries']}")
+    logging.info(f"Notification-Cooldown: {config['settings']['notification_cooldown']}")
     logging.debug(config)
     monitor_docker_logs(config)
     
