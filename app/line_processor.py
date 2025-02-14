@@ -13,6 +13,7 @@ class LogProcessor:
     def __init__(self, config, container, keywords, keywords_with_file, timeout=1):
         self.config = config
         self.container_name = container.name
+        self.container = container
         self.buffer = []
         self.log_stream_timeout = timeout
         self.log_stream_last_updated = time.time()
@@ -82,7 +83,7 @@ class LogProcessor:
 
     def _check_flush(self):
         while self.running:
-            time.sleep(0.1)  # Häufigere Checks für präziseres Timeout
+            time.sleep(1)  # Häufigere Checks für präziseres Timeout
             with self.lock:
                 if (time.time() - self.log_stream_last_updated > self.log_stream_timeout) and self.buffer:
                     self._handle_and_clear_buffer()
