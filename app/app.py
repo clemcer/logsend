@@ -4,7 +4,6 @@ import re
 import logging
 import docker
 import threading
-import time
 import traceback
 import signal
 from datetime import datetime
@@ -57,8 +56,9 @@ def load_config():
             logging.info("Konfigurationsdatei erfolgreich geladen.")
     except FileNotFoundError:
         logging.warning("config.yaml nicht gefunden. Verwende nur Umgebungsvariablen.")
-    config.setdefault("notifications", {})
 
+    config.setdefault("notifications", {})
+    config.setdefault("settings", {})
     allowed_keys = {"notifications", "settings", "containers", "global_keywords"}
     for key in list(config.keys()):  # Wichtiger Hinweis: Liste der Keys erstellen, um die Iteration zu sichern.
         if key not in allowed_keys:
@@ -77,7 +77,19 @@ def load_config():
         "url": os.getenv("APPRISE_URL", config["notifications"].get("apprise", {}).get("url", "")),
     }
     config["containers"] = config.get("containers", [])
-    
+
+
+    config["settings"] = {
+        "multi_line_entries": os.getenv("MULTI_LINE_ENTRIES", config.get("settings", {}).get("multi_line_entries", True)),
+        "notification_cooldown": os.getenv("NOTIFICATION_COOLDOWN", config.get("settings", {}).get("notification_cooldown", 10))
+    }
+
+
+        
+
+    logging.info(f"Multi-Line-Mode: {config['settings']['multi_line_entries']}")
+    logging.info(f"Notification-Cooldown: {config['settings']['notification_cooldown']}")
+
     return config
 
 
@@ -85,7 +97,6 @@ def restart_docker_container():
     if bool(os.getenv("DISABLE_RESTART_MESSAGE", config.get("settings", {}).get("disable_restart_message", False))) == False:
         send_notification(config, "Loggifly:", "Config Change detected. The programm is restarting.")
     logging.debug("restart_docker_container function was called")
-    time.sleep(5)
     client = docker.from_env()
     container_id = os.getenv("HOSTNAME")  # Docker setzt HOSTNAME auf die Container-ID
     container = client.containers.get(container_id)
@@ -124,12 +135,10 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
     Überwacht die Logs eines Containers und sendet Benachrichtigungen bei Schlüsselwörtern.
     """
     now = datetime.now()
-    keyword_notification_cooldown = os.getenv("keyword_notification_cooldown", config.get("settings", {}).get("keyword_notification_cooldown", 10))
-    logging.debug(f"keyword_notification_cooldown: {keyword_notification_cooldown}")
     local_keywords = keywords.copy()
     local_keywords_with_file = keywords_with_file.copy()
-
-    processor = LogProcessor(config, container, local_keywords, local_keywords_with_file, timeout=1)  
+  
+    processor = LogProcessor(config, container, local_keywords, local_keywords_with_file, timeout=5)  
     
     try:
         log_stream = container.logs(stream=True, follow=True, since=now)
@@ -144,7 +153,7 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
                 log_line_decoded = str(log_line.decode("utf-8")).strip()
                 #logging.debug(f"Log-Line: {log_line_decoded}")
                 if log_line_decoded:
-                    processor.process_multi_line(log_line_decoded)
+                    processor.process_line(log_line_decoded)
             except UnicodeDecodeError:
                 logging.warning("Fehler beim Dekodieren einer Log-Zeile von %s", container.name)
     except docker.errors.APIError as e:
@@ -224,10 +233,11 @@ def monitor_docker_logs(config):
             threads.append(thread)
             thread.start()
             logging.info("Monitoring new container: %s", container_from_event.name)
+            send_notification(config, "Loggifly", f"Monitoring new container: {container_from_event.name}")
 
 
-    for thread in threads:
-        thread.join()
+    # for thread in threads:
+    #     thread.join()
 
 if __name__ == "__main__":
     logging.info("Loggifly started")
