@@ -129,7 +129,7 @@ def monitor_container_logs(config, client, container, keywords, keywords_with_fi
     local_keywords = keywords.copy()
     local_keywords_with_file = keywords_with_file.copy()
 
-    processor = LogProcessor(config, container.name, local_keywords, local_keywords_with_file, timeout=1)  
+    processor = LogProcessor(config, container, local_keywords, local_keywords_with_file, timeout=1)  
     
     try:
         log_stream = container.logs(stream=True, follow=True, since=now)

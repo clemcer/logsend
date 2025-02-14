@@ -59,6 +59,8 @@ def send_ntfy_notification(config, container_name, message, keyword=None, file_n
         logging.error("Ntfy-Konfiguration fehlt. Benachrichtigung nicht möglich.")
         return
 
+    message = ("This message had to be shortened: \n" if len(message) > 3900 else "") + message[:3900]
+
     headers = {
         "Authorization": f"Bearer {ntfy_token}",
         "Tags": f"{ntfy_tags}",

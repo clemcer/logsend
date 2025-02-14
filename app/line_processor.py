@@ -10,9 +10,9 @@ from notifier import send_notification
 logging.getLogger(__name__)
 
 class LogProcessor:
-    def __init__(self, config, container_name, keywords, keywords_with_file, timeout=1):
+    def __init__(self, config, container, keywords, keywords_with_file, timeout=1):
         self.config = config
-        self.container_name = container_name
+        self.container_name = container.name
         self.buffer = []
         self.log_stream_timeout = timeout
         self.log_stream_last_updated = time.time()
@@ -57,23 +57,25 @@ class LogProcessor:
             r"(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])-\d{4} \d{2}:\d{2}:\d{2}",     # 02-13-2025 16:36:02
             r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}, \d{4} \d{2}:\d{2}:\d{2}",  # Feb 13, 2025 16:36:02
             r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{1,2}\s\d{2}:\d{2}:\d{2}\sGMT[+-]\d{2}:\d{2}\s\d{4}",  # Thu Feb 13 17:37:32 GMT+01:00 2025
+            r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{1,2}\s\d{2}:\d{2}:\d{2}\s\d{4}",                      # Fri Feb 14 06:27:03 2025 
             r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}\.\d{6}",                     # 2025/02/13 17:18:50.410540
+            r"\d{2}/\d{2}/\d{4}, \d{1,2}:\d{2}:\d{2}",                              # 02/14/2025, 4:23:18 AM
             r"\[(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\]",                        # Log-Level in square brackets, e.g. [INFO]
             r"\(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL\)",                          # Log-Level in round brackets, e.g. (INFO)
+            r"(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)",                            # Log-Level as a single word
             r"(?i)\[(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\]",                    # Log-Level in square brackets, e.g. [INFO], case-insensitive
             r"(?i)\(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL\)",                      # Log-Level in round brackets, e.g. (INFO), case-insensitive
-            r"(?i)\b(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\b",                     # Log-Level as a single word, case-insensitive
-            r"(?i)(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)"                     # Log-Level as a single word without word boundary, case-insensitive
-
-
+            r"(?i)\b(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\b",                    # Log-Level as a single word, case-insensitive
+            r"(?i)(INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)"                         # Log-Level as a single word without word boundary, case-insensitive
         ]
+                                                                 #Fri Feb 14 06:27:03 2025
         if self.pattern == "":
            # logging.debug("Searching for pattern")
             for pattern in patterns:
                 if re.search(pattern, line):
                     #logging.debug(f"Found pattern: {pattern}")
                     self.pattern = pattern
-                    logging.debug(f"{self.container_name}: Found pattern: {pattern}")
+                    logging.debug(f"{self.container_name}: \nFound pattern: {pattern} \In line: {line}")
                     break
                 else:
                     logging.debug(f"{self.container_name}: pattern ({pattern}) did not match")
@@ -147,7 +149,7 @@ class LogProcessor:
 
         file_name = f"last_{lines}_lines_from_{self.container_name}.log"
 
-        log_tail = self.container_name(tail=lines).decode("utf-8")
+        log_tail = self.container.logs(tail=lines).decode("utf-8")
         with open(file_name, "w") as file:  
             file.write(log_tail)
             return file_name
