@@ -3,6 +3,7 @@ import os
 import re
 import time
 import logging
+import threading
 from threading import Thread, Lock
 from notifier import send_notification
 
@@ -30,6 +31,10 @@ class LogProcessor:
 
         self._initialise_keywords()
         self._find_pattern()
+
+        self.find_pattern_thread = Thread(target=self._find_pattern)
+        self.find_pattern_thread.daemon = True
+        self.find_pattern_thread.start
 
         # Starte Hintergrund-Thread für Timeout
         self.flush_thread = Thread(target=self._check_flush)
@@ -59,46 +64,49 @@ class LogProcessor:
         
 
     def _find_pattern(self):
-        if not self.multi_line:
-            return
+        # if not self.multi_line:
+        #     return
      #   count = 0
-        found_pattern_event = self.shutdown_event
+
+        time_stamp_patterns = [
+            # Matches ISO 8601 with optional timezone and milliseconds
+            # Examples: "2025-02-13 16:36:02", "2025-02-13T16:36:02Z", "2025-02-13T16:36:02.123Z", "2025-02-13T16:36:02+01:00"
+            r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[Z+-]\d{2}:?\d{2}|\.\d{3,6}Z?)?",
+
+            # Matches Unix epoch time (10-digit)
+            # Example: "1718292832"
+            r"\b\d{10}\b",
+
+            # Matches month names with optional suffixes and commas
+            # Examples: "Feb 13, 2025 16:36:02", "February 13 2025 16:36:02"
+            r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4} \d{2}:\d{2}:\d{2}",
+
+            # Matches dates with separators (- or /) and optional month names
+            # Examples: "13-02-2025 16:36:02", "13/Feb/2025 16:36:02", "02-13-2025 16:36:02"
+            r"\d{1,2}[-/](?:0[1-9]|1[0-2]|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/]\d{4}[ :T]\d{1,2}:\d{2}:\d{2}",
+
+            # Matches dates with slashes and optional commas
+            # Examples: "02/13/2025 16:36:02", "02/13/2025, 4:23:18 PM"
+            r"\d{2,4}/\d{2}/\d{2,4}[, ]\d{1,2}:\d{2}:\d{2}",
+        ]
+
+        log_level_patterns = [
+            # Matches log levels in square or round brackets (case-insensitive)
+            # Examples: "[INFO]", "(ERROR)", "[WARNING]", "(debug)"
+            r"(?i)([\[\(])(INFO|ERROR|DEBUG|WARN(ING)?|CRITICAL)([\]\)])",
+
+            # Matches log levels as standalone words with context (case-insensitive)
+            # Examples: "INFO:", "ERROR ", "WARNING)", "DEBUG]"
+            r"(?i)\b(INFO|ERROR|DEBUG|WARN(ING)?|CRITICAL)\b(?=\s|:|\)|\])",
+        ]
+        compiled_time_stamp_patterns = [re.compile(pattern) for pattern in time_stamp_patterns]
+        compiled_log_level_patterns = [re.compile(pattern) for pattern in log_level_patterns]
+        
+        logging.debug(f"container: {self.container_name}: Starting '_find_pattern()' thread")
+        #local_event = threading.Event()
         while not self.shutdown_event.wait(timeout=300):
          #   count += 1
-            time_stamp_patterns = [
-                # Matches ISO 8601 with optional timezone and milliseconds
-                # Examples: "2025-02-13 16:36:02", "2025-02-13T16:36:02Z", "2025-02-13T16:36:02.123Z", "2025-02-13T16:36:02+01:00"
-                r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[Z+-]\d{2}:?\d{2}|\.\d{3,6}Z?)?",
-
-                # Matches Unix epoch time (10-digit)
-                # Example: "1718292832"
-                r"\b\d{10}\b",
-
-                # Matches month names with optional suffixes and commas
-                # Examples: "Feb 13, 2025 16:36:02", "February 13 2025 16:36:02"
-                r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4} \d{2}:\d{2}:\d{2}",
-
-                # Matches dates with separators (- or /) and optional month names
-                # Examples: "13-02-2025 16:36:02", "13/Feb/2025 16:36:02", "02-13-2025 16:36:02"
-                r"\d{1,2}[-/](?:0[1-9]|1[0-2]|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/]\d{4}[ :T]\d{1,2}:\d{2}:\d{2}",
-
-                # Matches dates with slashes and optional commas
-                # Examples: "02/13/2025 16:36:02", "02/13/2025, 4:23:18 PM"
-                r"\d{2,4}/\d{2}/\d{2,4}[, ]\d{1,2}:\d{2}:\d{2}",
-            ]
-
-            log_level_patterns = [
-                # Matches log levels in square or round brackets (case-insensitive)
-                # Examples: "[INFO]", "(ERROR)", "[WARNING]", "(debug)"
-                r"(?i)([\[\(])(INFO|ERROR|DEBUG|WARN(ING)?|CRITICAL)([\]\)])",
-
-                # Matches log levels as standalone words with context (case-insensitive)
-                # Examples: "INFO:", "ERROR ", "WARNING)", "DEBUG]"
-                r"(?i)\b(INFO|ERROR|DEBUG|WARN(ING)?|CRITICAL)\b(?=\s|:|\)|\])",
-            ]
-
-            compiled_time_stamp_patterns = [re.compile(pattern) for pattern in time_stamp_patterns]
-            compiled_log_level_patterns = [re.compile(pattern) for pattern in log_level_patterns]
+        
             tmp_patterns = {pattern: 0 for pattern in compiled_time_stamp_patterns}
 
             log_tail = self.container.logs(tail=100).decode("utf-8")
@@ -148,7 +156,7 @@ class LogProcessor:
 
             logging.debug(f"container: {self.container_name}: Waiting 5 minutes to check again for patterns.")
 
-       # logging.debug(f"container: {self.container_name}: ending find_pattern thread")
+        logging.debug(f"container: {self.container_name}: Ending '_find_pattern()' thread")
 
     def _check_flush(self):
         while self.running:
