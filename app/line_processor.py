@@ -13,7 +13,6 @@ logging.getLogger(__name__)
 class LogProcessor:
     def __init__(self, config, container, keywords, keywords_with_file, shutdown_event, timeout=1):
         self.shutdown_event = shutdown_event
-        self.lock = Lock()
         self.config = config
         self.container_name = container.name
         self.container = container
@@ -26,6 +25,9 @@ class LogProcessor:
         self._initialise_keywords()
 
         if self.multi_line_config is True:
+            self.lock_buffer = Lock()
+            self.lock_patterns = Lock()
+
             self.time_stamp_patterns = [
                 # Matches ISO 8601 with optional timezone and milliseconds
                 # Examples: "2025-02-13 16:36:02", "2025-02-13T16:36:02Z", "2025-02-13T16:36:02.123Z", "2025-02-13T16:36:02+01:00"
@@ -71,7 +73,6 @@ class LogProcessor:
             self.log_stream_timeout = timeout
             self.log_stream_last_updated = time.time()
             self.running = True
-
             # Start Background-Thread for Timeout
             self.flush_thread = Thread(target=self._check_flush)
             self.flush_thread.daemon = True
@@ -101,15 +102,16 @@ class LogProcessor:
             logging.debug(f"Refreshing pattern")
             self._find_pattern()
             if self.patterns is not []:
-                logging.info(f"container: {self.container_name}: pattern refreshed: {self.patterns}")
+                logging.info(f"container: {self.container_name}: attern refreshed: {self.patterns}")
             else:
-                logging.info(f"container: {self.container_name}: No pattern found in log. Mode: single-line.")
+                logging.info(f"container: {self.container_name}: Pattern refreshed. No pattern found. Mode: single-line.")
             logging.debug(f"container: {self.container_name}: Waiting 5 minutes to check again for patterns.")
 
 
     def _find_pattern(self):
         # if not self.multi_line:
         #     return
+        self.waiting_for_pattern = True
         logging.debug(f"container: {self.container_name}While Loop running")
     
         tmp_patterns = {pattern: 0 for pattern in self.compiled_time_stamp_patterns}
@@ -126,41 +128,40 @@ class LogProcessor:
         total_lines = len(log_tail.splitlines())
         threshold = max(5, int(total_lines * 0.1))
 
-        with self.lock:
-            self.patterns = []
-            for pattern in sorted_patterns:
-                if pattern[1] > threshold:
-                    self.patterns.append(pattern[0])
-                    
-            if self.patterns == []:
-                tmp_patterns = {pattern: 0 for pattern in self.compiled_log_level_patterns}
+        self.patterns = []
+        for pattern in sorted_patterns:
+            if pattern[1] > threshold:
+                self.patterns.append(pattern[0])
+                
+        if self.patterns == []:
+            tmp_patterns = {pattern: 0 for pattern in self.compiled_log_level_patterns}
 
-                for line in log_tail.splitlines():
-                    for pattern in self.compiled_log_level_patterns:
-                        if pattern.search(line):
-                            tmp_patterns[pattern] += 1
-                            #logging.debug(f"container: {self.container_name}: Found pattern: {pattern} --- In line: {line}")
-                            break
+            for line in log_tail.splitlines():
+                for pattern in self.compiled_log_level_patterns:
+                    if pattern.search(line):
+                        tmp_patterns[pattern] += 1
+                        #logging.debug(f"container: {self.container_name}: Found pattern: {pattern} --- In line: {line}")
+                        break
 
-            sorted_patterns = sorted(tmp_patterns.items(), key=lambda x: x[1], reverse=True)
-            for pattern in sorted_patterns:
-                if pattern[1] > threshold:
-                    self.patterns.append(pattern[0])
+        sorted_patterns = sorted(tmp_patterns.items(), key=lambda x: x[1], reverse=True)
+        for pattern in sorted_patterns:
+            if pattern[1] > threshold:
+                self.patterns.append(pattern[0])
 
-            #logging.debug(f"container: {self.container_name}: Found patterns: {self.patterns}")
+        #logging.debug(f"container: {self.container_name}: Found patterns: {self.patterns}")
 
-            if self.patterns == []:
-                self.valid_pattern = False
-                logging.info(f"container: {self.container_name}: No pattern found in log. Mode: single-line.")
-            else:
-                self.valid_pattern = True
-                logging.info(f"container: {self.container_name}: Found pattern(s) in log. Mode: multi-line.\nPatterns: {self.patterns}")
-        
+        if self.patterns == []:
+            self.valid_pattern = False
+            logging.info(f"container: {self.container_name}: No pattern found in log. Mode: single-line.")
+        else:
+            self.valid_pattern = True
+            logging.info(f"container: {self.container_name}: Found pattern(s) in log. Mode: multi-line.\nPatterns: {self.patterns}")
+        self.waiting_for_pattern = False
 
     def _check_flush(self):
         while self.running:
             time.sleep(1)  # Häufigere Checks für präziseres Timeout
-            with self.lock:
+            with self.lock_buffer:
                 if (time.time() - self.log_stream_last_updated > self.log_stream_timeout) and self.buffer:
                     self._handle_and_clear_buffer()
 
@@ -168,20 +169,16 @@ class LogProcessor:
         if self.multi_line_config == False:
             self._search_and_send(line)
         else:
-            with self.lock:
-                if self.valid_pattern == True and self.patterns != []:
-                    self._process_multi_line(line)
-                else:
-                    self._search_and_send(line)
+            if self.valid_pattern == True:
+                self._process_multi_line(line)
+            else:
+                self._search_and_send(line)
 
     def _process_multi_line(self, line):
-       # with self.lock:
-        if self.patterns == []:
-            self._search_and_send(line)
-            return
-        tmp_patterns = self.patterns.copy()
+        while self.waiting_for_pattern == True:
+            time.sleep(1)
 
-        for pattern in tmp_patterns:
+        for pattern in self.patterns:
             if pattern.search(line):
                 if self.buffer:
                     self._handle_and_clear_buffer()
@@ -256,7 +253,7 @@ class LogProcessor:
 
     def stop(self):
         self.running = False
-        with self.lock:
+        with self.lock_buffer:
             if self.buffer:
                 self._handle_and_clear_buffer()
 
