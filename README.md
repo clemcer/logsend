@@ -6,7 +6,7 @@
     <img src="/icon.png" alt="Logo" width="300" height="auto">
   </a>
 
-<h1 align="center">Loggifly</h1>
+<h1 align="center">LoggiFly</h1>
 
   <p align="center">
     <a href="https://github.com/clemcer/Loggifly/issues">Report Bug</a>
