@@ -3,3 +3,4 @@ requests
 pyyaml
 watchdog
 apprise
+pydantic

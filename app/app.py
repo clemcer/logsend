@@ -1,5 +1,4 @@
 import os
-import yaml
 import logging
 import docker
 import threading
@@ -10,18 +9,41 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from notifier import send_notification
 from line_processor import LogProcessor
-from load_config import
+from load_config import load_config
 
+logging.basicConfig(
+     level = "INFO",
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("monitor.log", mode="w"),
+        logging.StreamHandler()
+    ]
+)
+
+logging.info("Loggifly started")
 
 shutdown_event = threading.Event()
-config = {}
+config = load_config()
+
+
+def create_handle_signal(config):
+    def handle_signal(signum, frame):
+        if config.settings.disable_shutdown_message is False:
+            send_notification(config, "Loggifly:", "The program is shutting down.")
+        logging.info(f"Signal {signum} received. shutting down...")
+        shutdown_event.set()
+    return handle_signal
+
+signal_handler = create_handle_signal(config)
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
+
 
 def set_logging(config):
-    log_level = os.getenv("LOG_LEVEL", config.get("settings", {}).get("log-level", "INFO")).upper()
+    log_level = config.settings.log_level
     logging.getLogger().handlers.clear()
     logging.basicConfig(
         level = getattr(logging, log_level.upper(), logging.INFO),
-       # level = "DEBUG",
         format="%(asctime)s - %(levelname)s - %(message)s",
         handlers=[
             logging.FileHandler("monitor.log", mode="w"),
@@ -29,88 +51,13 @@ def set_logging(config):
         ]
     )
     logging.info(f"Log-Level set to {log_level}")
-    logging.debug("This is a Debug-Message")
-    logging.info("This is an Info-Message")
-    logging.warning("This is a Warning-Message")
-
-
-
-def handle_signal(signum, frame):
-    if str_to_bool(str(os.getenv("DISABLE_SHUTDOWN_MESSAGE", config.get("settings", {}).get("disable_shutdown_message", False)))) is False:
-        send_notification(config, "Loggifly:", "The programm is shutting down.")
-
-    logging.info(f"Signal {signum} received. shutting down...")
-    shutdown_event.set() 
-
-signal.signal(signal.SIGTERM, handle_signal)
-signal.signal(signal.SIGINT, handle_signal)
-
-
-def str_to_bool(value: str) -> bool:
-    return value.lower() == "true"
-
-def load_config():
-    """
-    Load config from config.yaml or override with environment variables
-    """
-    global config 
-    
-    try:
-        with open("/app/config.yaml", "r") as file:
-            config = yaml.safe_load(file)
-            logging.info("Konfigurationsdatei erfolgreich geladen.")
-    except FileNotFoundError:
-        logging.warning("config.yaml nicht gefunden. Verwende nur Umgebungsvariablen.")
-
-    config.setdefault("notifications", {})
-    config.setdefault("settings", {})
-
-    if isinstance(config["containers"], list):
-        config["containers"] = {name: {} for name in config["containers"]}
-
-    
-    allowed_keys = {"notifications", "settings", "containers", "global_keywords"}
-    for key in list(config.keys()):
-        if key not in allowed_keys:
-            del config[key]
-
-    config["notifications"]["ntfy"] = {
-        "url": os.getenv("NTFY_URL", config["notifications"].get("ntfy", {}).get("url", "")),
-        "topic": os.getenv("NTFY_TOPIC", config["notifications"].get("ntfy", {}).get("topic", "")),
-        "token": os.getenv("NTFY_TOKEN", config["notifications"].get("ntfy", {}).get("token", "")),
-        "priority": os.getenv("NTFY_PRIORITY", config["notifications"].get("ntfy", {}).get("priority", "3")),
-        "tags": os.getenv("NTFY_TAGS", config["notifications"].get("ntfy", {}).get("tags", "kite, mag")),
-    }
-
-    config["notifications"]["apprise"] = {
-        "url": os.getenv("APPRISE_URL", config["notifications"].get("apprise", {}).get("url", "")),
-    }
-
-    config["settings"] = {
-        "multi_line_entries": str_to_bool(str(str(os.getenv("MULTI_LINE_ENTRIES", config.get("settings", {}).get("multi_line_entries", True))))),
-        "notification_cooldown": os.getenv("NOTIFICATION_COOLDOWN", config.get("settings", {}).get("notification_cooldown", 10)),
-        "disable_restart_message": str_to_bool(str(os.getenv("DISABLE_RESTART_MESSAGE", config.get("settings", {}).get("disable_restart_message", False)))),
-        "disable_restart": str_to_bool(str(os.getenv("DISABLE_RESTART", config.get("settings", {}).get("disable_restart", False)))),
-        "disable_start_message": str_to_bool(str(os.getenv("DISABLE_START_MESSAGE", config.get("settings", {}).get("disable_start_message", False)))),
-        "disable_shutdown_message": str_to_bool(str(os.getenv("DISABLE_SHUTDOWN_MESSAGE", config.get("settings", {}).get("disable_shutdown_message", False))))
-    }
-
-    if isinstance(config.get("global_keywords"), list):
-        config["global_keywords"] = {
-            "keywords": config.get("global_keywords", ""),
-            "keywords_with_attachment": []
-        }
-    elif isinstance(config.get("global_keywords"), dict):
-        config["global_keywords"] = {
-            "keywords": config.get("global_keywords", {}).get("keywords", ""),
-            "keywords_with_attachment": config.get("global_keywords", {}).get("keywords_with_attachment", "")
-        }
-    return config
-
+    # logging.debug("This is a Debug-Message")
+    # logging.info("This is an Info-Message")
+    # logging.warning("This is a Warning-Message")
 
 
 def restart_docker_container():
-    if config["settings"]["disable_restart_message"] is False:
+    if config.settings.disable_restart_message is False:
         send_notification(config, "Loggifly:", "Config Change detected. The programm is restarting.")
     logging.info("The programm is restarting.")
     client = docker.from_env()
@@ -160,7 +107,6 @@ def monitor_container_logs(config, client, container):
                 break
 
             buffer += chunk
-
             while b'\n' in buffer:
                 line, buffer = buffer.split(b'\n', 1)
                 try:
@@ -184,7 +130,7 @@ def monitor_container_logs(config, client, container):
 
 def main(config):
     """
-    Create Threads for each container to monitor their logs 
+    Creates Threads for each container to monitor their logs 
     as well as monitoring docker events for new containers. 
     And a thread fot watching config changes.
     """
@@ -192,7 +138,7 @@ def main(config):
 
     client = docker.from_env()
     selected_containers = [ ]
-    for container in config["containers"]:
+    for container in config.containers:
         selected_containers.append(container)
     containers = client.containers.list()
 
@@ -208,7 +154,7 @@ def main(config):
     else:
         unmonitored_containers_str = ""
 
-    if bool(config["settings"]["disable_start_message"]) is False:
+    if config.settings.disable_start_message is False:
         send_notification(config, "Loggifly", f"The programm is running and monitoring these selected Containers:\n - {containers_to_monitor_str}{unmonitored_containers_str}")
     
     for container in containers_to_monitor:
@@ -217,7 +163,7 @@ def main(config):
         thread.start()
 
 
-    if config["settings"]["disable_restart"] is False:
+    if config.settings.disable_restart is False:
         thread_file_change = threading.Thread(target=detect_config_changes)
         threads.append(thread_file_change)
         thread_file_change.start()
@@ -243,11 +189,7 @@ def main(config):
     #     thread.join()
 
 if __name__ == "__main__":
-    logging.info("Loggifly started")
-    config = load_config()
     set_logging(config)
-    logging.info(f"Multi-Line-Mode: {config['settings']['multi_line_entries']}")
-    logging.info(f"Notification-Cooldown: {config['settings']['notification_cooldown']}")
-    logging.debug(config)
+    logging.info(f"CONFIG:\n{config.model_dump_json(indent=2)}")
     main(config)
     

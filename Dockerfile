@@ -16,18 +16,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Kopiere die restlichen Dateien (Skript und Konfiguration) in den Container
 COPY icon.png .
+COPY app/load_config.py .
 COPY app/notifier.py .
 COPY app/app.py .
 COPY app/line_processor.py .
 
 
-
-
-# Setze Standard-Umgebungsvariablen (optional, können aber beim Start überschrieben werden)
-#ENV NTFY_URL="https://ntfy.sh"
-#ENV NTFY_TOPIC="alerts"
-#ENV NTFY_TOKEN=""
-#ENV NTFY_PRIORITY="default"
-
-# Standardbefehl, um das Python-Skript auszuführen
 CMD ["python", "app.py"]

@@ -7,26 +7,23 @@ import threading
 from threading import Thread, Lock
 from notifier import send_notification
 
-
-logging.getLogger(__name__)
-
-
 class LogProcessor:
-
-
 
     STRICT_PATTERNS = [
             
         # combined timestamp and log level
-        r"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:,\d{3})?\] \[(?:INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\]",
+        r"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:,\d{3})?\] \[(?:INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)\]", # 
         r"^\d{4}-\d{2}-\d{2}(?:, | )\d{2}:\d{2}:\d{2}(?:,\d{3})? (?:INFO|ERROR|DEBUG|WARN|WARNING|CRITICAL)",
         
         # ISO in brackets
-        r"^\[\d{4}-\d{2}-\d{2}(?:T|, | )\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2}| [+-]\d{4})\]", # [2025-02-17T03:23:07Z] or [2025-02-17 04:22:59 +0100]
+        r"^\[\d{4}-\d{2}-\d{2}(?:T|, | )\d{2}:\d{2}:\d{2}(?:Z|[\.,]\d{2,6}|[+-]\d{2}:\d{2}| [+-]\d{4})\]", # [2025-02-17T03:23:07Z] or [2025-02-17 04:22:59 +0100] or [2025-02-18T03:23:05.436627]
 
         # Months in brackets
         r"^\[(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}, \d{4} \d{2}:\d{2}:\d{2}\]",                                                  # [Feb 17, 2025 10:13:02]
         r"^\[\d{1,2}\/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\/\d{4}(?:\:| |\/)\d{2}:\d{2}:\d{2}(?:Z||\s[+\-]\d{2}:\d{2}|\s[+\-]\d{4})\]", # [17/Feb/2025:10:13:02 +0000]
+
+        # ISO without brackes
+        r"^\b\d{4}-\d{2}-\d{2}(?:T|, | )\d{2}:\d{2}:\d{2}(?:Z|[\.,]\d{2,6}|[+-]\d{2}:\d{2}| [+-]\d{4})\b",
 
         # Months without brackets
         r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2}, \d{4} \d{2}:\d{2}:\d{2}\b",
@@ -46,7 +43,7 @@ class LogProcessor:
             # ----------------------------------------------------------------
             
             r"\b\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\b",
-            r"\b\d{4}-\d{2}-\d{2}(?:T|, | )\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2}| [+-]\d{4})\b", # 2025-02-17T03:23:07Z
+            r"\b\d{4}-\d{2}-\d{2}(?:T|, | )\d{2}:\d{2}:\d{2}(?:Z|[\.,]\d{2,6}|[+-]\d{2}:\d{2}| [+-]\d{4})\b", # 2025-02-17T03:23:07Z
             r"\b(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])-\d{4} \d{2}:\d{2}:\d{2}\b",
             r"(?i)\b\d{2}\/\d{2}\/\d{4}(?:,\s+|:|\s+])\d{1,2}:\d{2}:\d{2}\s*(?:AM|PM)?\b",
             r"\b\d{10}\.\d+\b",                                                          # 1739762586.0394847
@@ -70,15 +67,21 @@ class LogProcessor:
     def __init__(self, config, container, shutdown_event, timeout=1):
         self.shutdown_event = shutdown_event
         self.config = config
-        self.container_keywords = list(config.get("global_keywords", {}).get("keywords", []))
-        self.container_keywords_with_file = list(config.get("global_keywords", {}).get("keywords_with_attachment", []))
-        self.container_name = container.name
         self.container = container
-        self.multi_line_config = config['settings']['multi_line_entries']
+        self.container_name = container.name
+        self.container_keywords = list(config.global_keywords.keywords) + list(config.containers[self.container_name].keywords)
+        self.container_keywords_with_file = list(config.global_keywords.keywords_with_attachment) + list(config.containers[self.container_name].keywords)
+        self.lines_number_attachment = config.containers[self.container_name].attachment_lines or config.settings.attachment_lines
+        self.multi_line_config = config.settings.multi_line_entries
+        self.notification_cooldown = config.settings.notification_cooldown
+        self.time_per_keyword = {}   
+        for keyword in self.container_keywords + self.container_keywords_with_file:
+            if isinstance(keyword, dict) and keyword.get("regex") is not None:
+                self.time_per_keyword[keyword["regex"]] = 0
+            else:
+                self.time_per_keyword[keyword] = 0  
 
-        self.notification_cooldown = config['settings']['notification_cooldown']
-        self.time_per_keyword = {}     
-        self._initialise_keywords()
+        logging.debug(f"container: {self.container_name}: Keywords: {self.container_keywords}, Keywords with attachment: {self.container_keywords_with_file}")
 
         if self.multi_line_config is True:
             self.lock_buffer = Lock()
@@ -102,30 +105,9 @@ class LogProcessor:
             self.flush_thread.daemon = True
             self.flush_thread.start()
 
-    
-    def _initialise_keywords(self):
-        container_config = self.config["containers"].get(self.container_name, {})
-        if isinstance(container_config, list):
-            self.container_keywords.extend(container_config)
-            self.lines_number_attachment = int(os.getenv("ATTACHMENT_LINES", self.config.get("settings", {}).get("attachment_lines", 50)))
-        elif isinstance(container_config, dict):
-            self.container_keywords.extend(container_config.get("keywords", []))
-            self.container_keywords_with_file.extend(container_config.get("keywords_with_attachment", []))
-            self.lines_number_attachment = int(self.config.get("containers", {}).get(self.container_name, {}).get("attachment_lines") or os.getenv("ATTACHMENT_LINES", self.config.get("settings", {}).get("attachment_lines", 50)))
+        
 
-
-
-   
-            
-
-
-        logging.info(f"container: {self.container_name}: Keywords: {self.container_keywords}, Keywords with attachment: {self.container_keywords_with_file}")
-
-        for keyword in self.container_keywords + self.container_keywords_with_file:
-            if isinstance(keyword, dict) and keyword.get("regex") is not None:
-                self.time_per_keyword[keyword["regex"]] = 0
-            else:
-                self.time_per_keyword[keyword] = 0
+        
 
     
     # def _refresh_pattern(self):
@@ -256,10 +238,8 @@ class LogProcessor:
                         logging.info(f"Keyword '{keyword}' was found in {self.container_name}: {log_line}") 
                     self.time_per_keyword[keyword] = time.time()
 
-    def _log_attachment(self):
-        
+    def _log_attachment(self):  
         file_name = f"last_{self.lines_number_attachment}_lines_from_{self.container_name}.log"
-
         log_tail = self.container.logs(tail=self.lines_number_attachment).decode("utf-8")
         with open(file_name, "w") as file:  
             file.write(log_tail)

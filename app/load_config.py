@@ -5,28 +5,27 @@ from pydantic import (
     field_validator,
     model_validator,
     ConfigDict,
-    
+    SecretStr    
 )
 from typing import Dict, List, Optional, Union
 import os
-from typing import Dict, Union
 import logging
 import yaml
 
 logging.getLogger(__name__)
 
 """ 
-THIS MAY LOOK UNNECESSARY COMPLICATED BUT I WANTED TO USE AND LEARN PYDANTIC 
-I DIDN'T FIND A BUILT IN PYDANTIC SOLUTION FOR USING ENVIRONMENT VARIABLES TO OVERRIDE YAML VALUES WHILE KEEPING DEFAULT VALUES 
-SO FIRST I LOAD THE YAML AND THE ENVIRONMENT VARIABLES, THEN I MERGE THEM AND THEN I VALIDATE THE DATA WITH PYDANTIC
- """
-
+THIS MAY LOOK UNNECESSARILY COMPLICATED BUT I WANTED TO LEARN AND USE PYDANTIC 
+I DIDN'T MANAGE TO USE PYDANTIC WITH ENVIRONMENT VARIABLES THE WAY I WANTED. 
+I NEEDED ENV TO OVERRIDE YAML DATA AND YAML TO OVERRIDE DEFAULT VALUES AND I COULD NOT GET IT TO WORK
+SO NOW I FIRST LOAD THE YAML AND THE ENVIRONMENT VARIABLES, MERGE THEM AND THEN I VALIDATE THE DATA WITH PYDANTIC
+"""
 class NtfyConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_default=True)
 
     url: str = Field(..., description="Ntfy server URL")
     topic: str = Field(..., description="Ntfy topic name")
-    token: str = Field(default=None, description="Optional access token")
+    token: SecretStr = Field(default=None, description="Optional access token")
     priority: Union[str, int] = Field(default=3, description="Message priority 1-5")
     tags: str = Field("kite,mag", description="Comma-separated tags")
 
@@ -43,7 +42,7 @@ class NtfyConfig(BaseModel):
 
 class AppriseConfig(BaseModel):  
     model_config = ConfigDict(extra="forbid", validate_default=True)
-    url: str = Field(..., description="Apprise compatible URL")
+    url: SecretStr = Field(..., description="Apprise compatible URL")
 
 class NotificationsConfig(BaseModel):
     ntfy: Optional[NtfyConfig] = Field(default=None, validate_default=False)
@@ -54,8 +53,6 @@ class NotificationsConfig(BaseModel):
         if self.ntfy is None and self.apprise is None:
             raise ValueError("Mindestens eine Konfiguration (apprise oder ntfy) muss angegeben werden.")
         return self
-    
-
 
 class ContainerConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_default=True)
@@ -72,18 +69,6 @@ class ContainerConfig(BaseModel):
         if v and not 1 <= int(v) <= 5:
             raise ValueError("Ntfy piority must be between 1-5")
         return v
-    
-    # @model_validator(mode="before")
-    # def transform_legacy_format(cls, values):
-    #     # Convert legacy keyword list format
-    #     if isinstance(values.get("global_keywords"), list):
-    #         values[] = {
-    #             "keywords": values["global_keywords"],
-    #             "keywords_with_attachment": []
-    #         }
-        
-    #     return values
-
 class GlobalKeywords(BaseModel):
     keywords: List[str] = []
     keywords_with_attachment: List[str] = []
@@ -98,8 +83,7 @@ class Settings(BaseModel):
     disable_start_message: bool = Field(False, description="Disable startup notification")
     disable_shutdown_message: bool = Field(False, description="Disable shutdown notification")
     disable_restart_message: bool = Field(False, description="Disable config reload notification")
-
-
+    disable_restart: bool = Field(False, description="Disable restart on config change")
 
 class GlobalConfig(BaseModel):
     model_config = ConfigDict(
@@ -107,17 +91,26 @@ class GlobalConfig(BaseModel):
         validate_default=True
     )
     containers: Dict[str, ContainerConfig]
-    notifications: NotificationsConfig
     global_keywords: GlobalKeywords
+    notifications: NotificationsConfig
     settings: Settings
 
     @model_validator(mode="before")
     def transform_legacy_format(cls, values):
+    
+        # Convert legacy global_keywords format
+        if isinstance(values.get("global_keywords"), list):
+            values["global_keywords"] = {
+                "keywords": values["global_keywords"],
+                "keywords_with_attachment": []
+            }
+
         # Convert list containers to dict format
         if isinstance(values.get("containers"), list):
             values["containers"] = {
                 name: {} for name in values["containers"]
             }
+
          # Convert legacy keywords format per container
         for container in values.get("containers"):
             if isinstance(values.get("containers").get(container), list):
@@ -125,14 +118,13 @@ class GlobalConfig(BaseModel):
                     "keywords": values["containers"][container],
                     "keywords_with_attachment": []
                 }
-        # Convert legacy global_keywords format
-        if isinstance(values.get("global_keywords"), list):
-            values["global_keywords"] = {
-                "keywords": values["global_keywords"],
-                "keywords_with_attachment": []
-            }
-        
+            elif values.get("containers").get(container) is None:
+                values["containers"][container] = {
+                    "keywords": [],
+                    "keywords_with_attachment": []
+                }
         return values
+
 
 def merge_yaml_and_env(yaml, env_update):
     for key, value in env_update.items():
@@ -144,12 +136,10 @@ def merge_yaml_and_env(yaml, env_update):
     return yaml
 
 
-
-
 def load_config():
     yaml_config = {}
     try:
-        with open("/data/clems/Meine Dateien/PROJECTS/loggify/app/config.yaml", "r") as file:
+        with open("/app/config.yaml", "r") as file:
             yaml_config = yaml.safe_load(file)
             logging.info("Konfigurationsdatei erfolgreich geladen.")
     except FileNotFoundError:
@@ -199,7 +189,7 @@ def load_config():
 
 
 # os.environ["NTFY_URL"] = "ENV_URL"
-os.environ["LOG_LEVEL"] = "ERROR"
+# os.environ["LOG_LEVEL"] = "ERROR"
 
 if __name__ == "__main__":
 
@@ -207,7 +197,42 @@ if __name__ == "__main__":
 
 
     config = load_config()
-    print(config.model_dump_json(indent=2))
+    print(config.model_dump_json(indent=1))
 
-    print(hasattr(config.containers["audiobookshelf"], "ntfy_topic"))
-    print(config.containers)
+    # print(hasattr(config.containers["audiobookshelf"], "ntfy_topic"))
+    # # print(dir(config.containers["audiobookshelf"]))
+
+    # # print(config.containers)
+    # print(config.containers["audiobookshelf"].model_dump())
+    # if config.containers["audiobookshelf"].ntfy_topic:
+    #     print("YES")
+    # else:
+    #     print("No")
+    # # print(GlobalConfig.model_json_schema())#
+    # for c in config.containers:
+    #     print(c)
+    # print(config.settings.disable_restart)
+
+    # print("HIER")
+    # value = getattr(config.containers["audiobookshelf"], "ntfy_priority", config.notifications.ntfy.priority)
+    # print(value)
+
+    # print()
+    # print()
+    # container_config = config.containers["audiobookshelf"].model_dump
+    # print()
+    # print(container_config)
+    # # print(container_config.get("ntfy_priority", None))
+    # print([c for c in config.containers])
+    # print(config.global_keywords.keywords_with_attachment)
+    # print()
+    # print(list(config.global_keywords.keywords_with_attachment) + list(config.containers["audiobookshelf"].keywords))
+    # print(config.notifications.apprise.url.get_secret_value())
+    # for v in [key, value for key: value in config.containers["audiobookshelf"].items() if key not in ["keywords", "keywords_with_attachment"]]:
+    #     if v is not None:
+    #         print(v)
+#     print()
+# # GlobalConfig.containers["audiobookshelf"]
+#     for k, v in config.containers["audiobookshelf"].model_dump().items():
+#         if k not in ["keywords", "keywords_with_attachment"] and v is not None:
+#             print(k)

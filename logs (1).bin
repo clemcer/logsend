@@ -1,377 +1,0 @@
-IPs available for connection:
-['127.0.0.1', '::1', '172.30.0.2']
-Note: 0.0.0.0 is not the IP to connect. Instead use an IP above to connect.
-* Running on local URL:  http://0.0.0.0:7860
-
-To create a public link, set `share=True` in `launch()`.
-  0% 0/4 [00:00<?, ?files/s] 50% 2/4 [00:12<00:12,  6.30s/files]100% 4/4 [00:12<00:00,  3.15s/files]
-Extracted files to /home/user/app/models/__sessions/model-381ca24b-82b6-4739-924d-530d5df5cf9e/xtts/richtig_kaminski-entpackt
-Processing eBook file: harry_potter.html
-Available Processor Unit: cpu
-Running command: /usr/bin/ebook-convert /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/harry_potter.html /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/__harry_potter.epub --input-encoding=utf-8 --output-profile=generic_eink --verbose
-Conversion options changed from defaults:
-  output_profile: 'generic_eink'
-  verbose: 1
-  input_encoding: 'utf-8'
-1% Converting input to HTML...
-InputFormatPlugin: HTML Input running
-on /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/harry_potter.html
-Language not specified
-Creator not specified
-Building file list...
-	Found files...
-		 HTMLFile:0:a:'/home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/harry_potter.html'
-Normalizing filename cases
-Rewriting HTML links
-Parsing harry_potter.html ...
-34% Running transforms on e-book...
-Merging user specified metadata...
-Detecting structure...
-Auto generated TOC with 0 entries.
-Flattening CSS and remapping font sizes...
-Stylesheet 'hp_stylePTMR227080201005.css' referenced by file 'harry_potter.html' not in manifest
-Source base font size is 12.00000pt
-Removing fake margins...
-Found 25 items of level: p_1
-p_1  left margin stats: Counter({'0': 25})
-p_1  right margin stats: Counter({'0': 25})
-Cleaning up manifest...
-Trimming unused files from manifest...
-Creating EPUB Output...
-67% Running EPUB Output plugin
-Splitting markup on page breaks and flow limits, if any...
-	Looking for large trees in harry_potter.html...
-	No large trees found
-Generating default cover
-This EPUB file has no Table of Contents. Creating a default TOC
-EPUB output written to /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/__harry_potter.epub
-Output saved to   /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/__harry_potter.epub
-
-/home/user/.local/lib/python3.12/site-packages/ebooklib/epub.py:1423: FutureWarning: This search incorrectly ignores the root element, and will be fixed in a future version.  If you rely on the current behaviour, change it to './/xmlns:rootfile[@media-type]'
-  for root_file in tree.findall('//xmlns:rootfile[@media-type]', namespaces={'xmlns': NAMESPACES['CONTAINERNS']}):
-******* NOTE: YOU CAN SAFELY IGNORE "Character xx not found in the vocabulary." *******
-Loading TTS xtts model from /home/user/app/models/__sessions/model-381ca24b-82b6-4739-924d-530d5df5cf9e/xtts/richtig_kaminski-entpackt, it takes a while, please be patient...
-convertsion 0.00%:   0% 0/33 [00:00<?, ?step/s]Part 1 containing 33 sentences...
-Computing speaker latents...
-Converting 0.00%:   0% 0/33 [00:39<?, ?step/s] 
-Sentence: Hagrid machte ihnen Tee und bot ihnen Wiesel-Sandwiches an , die sie ablehnten . » Nun , ihr wolltet mich was fragen ? « »
-Converting 0.00%:   3% 1/33 [00:39<21:18, 39.97s/step]Converting 3.03%:   3% 1/33 [01:25<21:18, 39.97s/step]
-Sentence: Ja « , sagte Harry . Es machte keinen Sinn , um den heißen Brei herumzureden . » Wir haben uns gefragt ,
-Converting 3.03%:   6% 2/33 [01:25<22:29, 43.52s/step]Converting 6.06%:   6% 2/33 [02:10<22:29, 43.52s/step]
-Sentence: ob du uns sagen kannst , was den Stein der Weisen außer Fluffy sonst noch schützt . « Hagrid sah ihn missmutig an . »
-Converting 6.06%:   9% 3/33 [02:10<22:05, 44.19s/step]Converting 9.09%:   9% 3/33 [02:43<22:05, 44.19s/step]
-Sentence: Kann ich natürlich nicht « , sagte er . » Erstens weiß ich es selbst nicht . Zweitens wisst ihr schon zu viel ,
-Converting 9.09%:  12% 4/33 [02:43<19:07, 39.58s/step]Converting 12.12%:  12% 4/33 [03:03<19:07, 39.58s/step]
-Sentence: und deshalb würd ich nichts sagen , selbst wenn ich könnte . Der Stein ist aus einem guten Grund hier .
-Converting 12.12%:  15% 5/33 [03:03<15:10, 32.52s/step]Converting 15.15%:  15% 5/33 [03:36<15:10, 32.52s/step]
-Sentence: Aus Gringotts ist er fast gestohlen worden – ich nehm an , das habt ihr auch schon rausgefunden ? Das haut mich allerdings um ,
-Converting 15.15%:  18% 6/33 [03:36<14:43, 32.74s/step]Converting 18.18%:  18% 6/33 [04:19<14:43, 32.74s/step]
-Sentence: dass ihr sogar von Fluffy wisst . « » Ach , hör mal , Hagrid , du willst es uns vielleicht nicht sagen ,
-Converting 18.18%:  21% 7/33 [04:19<15:37, 36.04s/step]Converting 21.21%:  21% 7/33 [04:56<15:37, 36.04s/step]
-Sentence: aber du weißt es , du weißt alles , was hier vor sich geht « , sagte Hermine mit warmer , schmeichelnder Stimme .
-Converting 21.21%:  24% 8/33 [04:56<15:05, 36.20s/step]Converting 24.24%:  24% 8/33 [05:18<15:05, 36.20s/step]
-Sentence: Hagrids Bart zuckte , und sie konnten erkennen , dass er lächelte . » Wir fragen uns nur , wer für die Bewachung verantwortlich war .
-Converting 24.24%:  27% 9/33 [05:18<12:42, 31.76s/step]Converting 27.27%:  27% 9/33 [06:06<12:42, 31.76s/step]
-Sentence: « Hermine drängte weiter . » Wir fragen uns , wem Dumbledore genug Vertrauen entgegenbringt , um ihn um Hilfe zu bitten ,
-Converting 27.27%:  30% 10/33 [06:06<14:10, 36.97s/step]Converting 30.30%:  30% 10/33 [06:59<14:10, 36.97s/step]
-Sentence: abgesehen natürlich von dir . « Bei ihren letzten Worten schwoll Hagrids Brust an . Harry und Ron strahlten zu Hermine hinüber . »
-Converting 30.30%:  33% 11/33 [06:59<15:23, 41.97s/step]Converting 33.33%:  33% 11/33 [07:01<15:23, 41.97s/step]
-Sentence: Nun gut , ich denk nicht , dass es schadet , wenn ich euch das erzähl … lasst mal sehen …
-Converting 33.33%:  36% 12/33 [07:01<10:22, 29.62s/step]Converting 36.36%:  36% 12/33 [07:15<10:22, 29.62s/step]
-Sentence: er hat sich Fluffy von mir geliehen … dann haben ein paar von den Lehrern Zauberbanne drübergelegt … Professor Sprout , Professor Flitwick ,
-Converting 36.36%:  39% 13/33 [07:15<08:20, 25.03s/step]Converting 39.39%:  39% 13/33 [07:46<08:20, 25.03s/step]
-Sentence: Professor McGonagall « , er zählte sie an den Fingern ab , » Professor Quirrell , und Dumbledore selbst hat natürlich auch was unternommen .
-Converting 39.39%:  42% 14/33 [07:46<08:26, 26.66s/step]Converting 42.42%:  42% 14/33 [08:06<08:26, 26.66s/step]
-Sentence: Wartet mal , ich hab jemanden vergessen . Ach ja , Professor Snape . « » Snape ? « » Ja ,
-Converting 42.42%:  45% 15/33 [08:06<07:25, 24.74s/step]Converting 45.45%:  45% 15/33 [08:33<07:25, 24.74s/step]
-Sentence: ihr seid doch nicht etwa immer noch hinter dem her ? Seht mal , Snape hat geholfen , den Stein zu schützen ,
-Converting 45.45%:  48% 16/33 [08:33<07:09, 25.26s/step]Converting 48.48%:  48% 16/33 [09:09<07:09, 25.26s/step]
-Sentence: da wird er ihn doch nicht stehlen wollen . « Harry wusste , dass Ron und Hermine dasselbe dachten wie er . »
-Converting 48.48%:  52% 17/33 [09:09<07:39, 28.73s/step]Converting 51.52%:  52% 17/33 [09:46<07:39, 28.73s/step]
-Sentence: Du bist der Einzige , der weiß , wie man an Fluffy vorbeikommt , nicht wahr , Hagrid ? « , fragte Harry begierig . »
-Converting 51.52%:  55% 18/33 [09:46<07:45, 31.01s/step]Converting 54.55%:  55% 18/33 [10:11<07:45, 31.01s/step]
-Sentence: Und du würdest es niemandem erzählen , oder , nicht mal einem der Lehrer ? « » Kein Mensch weiß es außer mir und Dumbledore «
-Converting 54.55%:  58% 19/33 [10:11<06:52, 29.45s/step]Converting 57.58%:  58% 19/33 [10:53<06:52, 29.45s/step]
-Sentence: , sagte Hagrid stolz . » Nun , das ist schon mal was « , murmelte Harry den andern zu . » Hagrid ,
-Converting 57.58%:  61% 20/33 [10:53<07:12, 33.24s/step]Converting 60.61%:  61% 20/33 [11:07<07:12, 33.24s/step]
-Sentence: könnten wir ein Fenster aufmachen ? Ich komme um vor Hitze . « » Geht nicht , Harry , tut mir leid « ,
-Converting 60.61%:  64% 21/33 [11:07<05:28, 27.38s/step]Converting 63.64%:  64% 21/33 [12:48<05:28, 27.38s/step]
-Sentence: sagte Hagrid . Harry sah , wie er einen Blick zum Feuer warf . Auch Harry sah hinüber . »
-Converting 63.64%:  67% 22/33 [12:48<09:03, 49.44s/step]Converting 66.67%:  67% 22/33 [13:24<09:03, 49.44s/step]
-Sentence: Hagrid – was ist das denn ? « Doch er wusste schon , was es war . Unter dem Kessel ,
-Converting 66.67%:  70% 23/33 [13:24<07:33, 45.34s/step]Converting 69.70%:  70% 23/33 [14:16<07:33, 45.34s/step]
-Sentence: im Herzen des Feuers , lag ein riesiges schwarzes Ei . » Ähem « , brummte Hagrid und fummelte nervös an seinem Bart . »
-Converting 69.70%:  73% 24/33 [14:16<07:05, 47.26s/step]Converting 72.73%:  73% 24/33 [14:53<07:05, 47.26s/step]
-Sentence: Das … ähm … « » Wo hast du es her , Hagrid ? « , sagte Ron und beugte sich über das Feuer ,
-Converting 72.73%:  76% 25/33 [14:53<05:54, 44.31s/step]Converting 75.76%:  76% 25/33 [15:41<05:54, 44.31s/step]
-Sentence: um sich das Ei näher anzusehen . » Es muss dich ein Vermögen gekostet haben . « » Hab’s gewonnen « , sagte Hagrid . »
-Converting 75.76%:  79% 26/33 [15:41<05:17, 45.32s/step]Converting 78.79%:  79% 26/33 [16:22<05:17, 45.32s/step]
-Sentence: Letzte Nacht . War unten im Dorf , hab mir ein oder zwei Gläschen genehmigt und mit ’nem Fremden ein wenig Karten gezockt .
-Converting 78.79%:  82% 27/33 [16:22<04:23, 43.98s/step]Converting 81.82%:  82% 27/33 [16:48<04:23, 43.98s/step]
-Sentence: Glaube , er war ganz froh , dass er es losgeworden ist , um ehrlich zu sein . « »
-Converting 81.82%:  85% 28/33 [16:48<03:13, 38.66s/step]Converting 84.85%:  85% 28/33 [17:24<03:13, 38.66s/step]
-Sentence: Aber was fängst du damit an , wenn es ausgebrütet ist ? « , fragte Hermine . » Na ja ,
-Converting 84.85%:  88% 29/33 [17:24<02:32, 38.02s/step]Converting 87.88%:  88% 29/33 [17:48<02:32, 38.02s/step]
-Sentence: ich hab ’n bisschen was gelesen « , sagte Hagrid und zog ein großes Buch unter seinem Kissen hervor . »
-Converting 87.88%:  91% 30/33 [17:48<01:41, 33.82s/step]Converting 90.91%:  91% 30/33 [18:31<01:41, 33.82s/step]
-Sentence: Aus der Bibliothek – Drachenzucht für Haus und Hof – ist ein wenig veraltet , klar , aber da steht alles drin .
-Converting 90.91%:  94% 31/33 [18:31<01:13, 36.50s/step]Converting 93.94%:  94% 31/33 [18:56<01:13, 36.50s/step]
-Sentence: Sind selten , die Stachelbuckel . « Hagrid sah sehr zufrieden aus ; Hermine allerdings nicht . » Hagrid , du lebst in einer Holzhütte «
-Converting 93.94%:  97% 32/33 [18:56<00:33, 33.00s/step]Converting 96.97%:  97% 32/33 [19:21<00:33, 33.00s/step]
-Sentence: , sagte sie . Doch er hörte sie nicht . Vergnügt summend stocherte er im Feuer herum
-Converting 96.97%: 100% 33/33 [19:21<00:00, 30.70s/step]
-End of Part 1
-********* Combined part audio file saved to /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/chapters/chapter_1.flac
-Combining part 1 to audio, sentence 0 to 32
-Converting 96.97%: 100% 33/33 [19:31<00:00, 35.50s/step]
-['chapter_1.flac']
-************ DYNAMIC BATCH SIZE SET TO 1259 ******************
-********* total audio parts saved to /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/Harry Potter - und der Stein der Weisen - Kapitel 14.flac
-ffmpeg version 5.1.6-0+deb12u1 Copyright (c) 2000-2024 the FFmpeg developers
-  built with gcc 12 (Debian 12.2.0-14)
-  configuration: --prefix=/usr --extra-version=0+deb12u1 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --enable-gnutls --enable-ladspa --enable-libaom --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libjack --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-libpulse --enable-librabbitmq --enable-librist --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-libzmq --enable-libzvbi --enable-lv2 --enable-omx --enable-openal --enable-opencl --enable-opengl --enable-sdl2 --disable-sndio --enable-libjxl --enable-pocketsphinx --enable-librsvg --enable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-libx264 --enable-libplacebo --enable-librav1e --enable-shared
-  libavutil      57. 28.100 / 57. 28.100
-  libavcodec     59. 37.100 / 59. 37.100
-  libavformat    59. 27.100 / 59. 27.100
-  libavdevice    59.  7.100 / 59.  7.100
-  libavfilter     8. 44.100 /  8. 44.100
-  libswscale      6.  7.100 /  6.  7.100
-  libswresample   4.  7.100 /  4.  7.100
-  libpostproc    56.  6.100 / 56.  6.100
-Input #0, flac, from '/home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/Harry Potter - und der Stein der Weisen - Kapitel 14.flac':
-  Metadata:
-    encoder         : Lavf59.27.100
-  Duration: 00:03:37.66, start: 0.000000, bitrate: 167 kb/s
-  Stream #0:0: Audio: flac, 24000 Hz, mono, s16
-Input #1, ffmetadata, from '/home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/metadata.txt':
-  Metadata:
-    title           : Harry Potter - und der Stein der Weisen - Kapitel 14
-    year            : 2025
-  Duration: 00:03:37.66, start: 0.000000, bitrate: 0 kb/s
-  Chapters:
-    Chapter #1:0: start 0.000000, end 217.664000
-      Metadata:
-        title           : Part 1
-Input #2, image2, from '/home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/harry_potter.jpg':
-  Duration: 00:00:00.04, start: 0.000000, bitrate: 18740 kb/s
-  Stream #2:0: Video: mjpeg (Baseline), yuvj420p(pc, bt470bg/unknown/unknown), 1200x1600 [SAR 96:96 DAR 3:4], 25 fps, 25 tbr, 25 tbn
-Stream mapping:
-  Stream #0:0 -> #0:0 (flac (native) -> aac (native))
-  Stream #2:0 -> #0:1 (copy)
-Press [q] to stop, [?] for help
-Output #0, ipod, to '/home/user/app/audiobooks/gui/host/web-381ca24b-82b6-4739-924d-530d5df5cf9e/Harry_Potter_-_und_der_Stein_der_Weisen_-_Kapitel_14.m4b':
-  Metadata:
-    title           : Harry Potter - und der Stein der Weisen - Kapitel 14
-    year            : 2025
-    encoder         : Lavf59.27.100
-  Chapters:
-    Chapter #0:0: start 0.000000, end 217.664000
-      Metadata:
-        title           : Part 1
-  Stream #0:0: Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, mono, fltp, 128 kb/s
-    Metadata:
-      encoder         : Lavc59.37.100 aac
-  Stream #0:1: Video: mjpeg (Baseline), yuvj420p(pc, bt470bg/unknown/unknown), 1200x1600 [SAR 96:96 DAR 3:4], q=2-31, 25 fps, 25 tbr, 12800 tbn (attached pic)
-frame=    0 fps=0.0 q=-1.0 size=       0kB time=00:00:00.00 bitrate=N/A speed=   0x    
-frame=    1 fps=0.0 q=-1.0 size=       0kB time=00:00:19.15 bitrate=   0.0kbits/s speed=37.9x    
-frame=    1 fps=1.0 q=-1.0 size=     256kB time=00:00:41.30 bitrate=  50.8kbits/s speed=41.1x    
-frame=    1 fps=0.7 q=-1.0 size=     768kB time=00:01:03.78 bitrate=  98.6kbits/s speed=42.4x    
-frame=    1 fps=0.5 q=-1.0 size=    1024kB time=00:01:27.16 bitrate=  96.2kbits/s speed=43.5x    
-frame=    1 fps=0.4 q=-1.0 size=    1280kB time=00:01:48.90 bitrate=  96.3kbits/s speed=43.5x    
-frame=    1 fps=0.3 q=-1.0 size=    1792kB time=00:02:12.42 bitrate= 110.9kbits/s speed=44.1x    
-frame=    1 fps=0.3 q=-1.0 size=    2048kB time=00:02:35.31 bitrate= 108.0kbits/s speed=44.3x    
-frame=    1 fps=0.2 q=-1.0 size=    2560kB time=00:02:58.07 bitrate= 117.8kbits/s speed=44.5x    
-frame=    1 fps=0.2 q=-1.0 size=    2816kB time=00:03:17.50 bitrate= 116.8kbits/s speed=43.8x    
-[ipod @ 0x555a2d63d240] Starting second pass: moving the moov atom to the beginning of the file
-frame=    1 fps=0.2 q=-1.0 Lsize=    3465kB time=00:03:37.68 bitrate= 130.4kbits/s speed=43.9x    
-video:92kB audio:3335kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 1.112815%
-[aac @ 0x555a2d63e3c0] Qavg: 8373.281
-
-*********** Session: 381ca24b-82b6-4739-924d-530d5df5cf9e **************
-Store it in case of interruption, crash, reuse of custom model or custom voice,
-you can resume the conversion with --session option
-  0% 0/4 [00:00<?, ?files/s] 50% 2/4 [00:12<00:12,  6.35s/files]100% 4/4 [00:12<00:00,  3.18s/files]
-Extracted files to /home/user/app/models/__sessions/model-381ca24b-82b6-4739-924d-530d5df5cf9e/xtts/richtig_strunk
-Processing eBook file: harry_potter.html
-Available Processor Unit: cpu
-Running command: /usr/bin/ebook-convert /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/harry_potter.html /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/__harry_potter.epub --input-encoding=utf-8 --output-profile=generic_eink --verbose
-Conversion options changed from defaults:
-  output_profile: 'generic_eink'
-  verbose: 1
-  input_encoding: 'utf-8'
-1% Converting input to HTML...
-InputFormatPlugin: HTML Input running
-on /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/harry_potter.html
-Language not specified
-Creator not specified
-Building file list...
-	Found files...
-		 HTMLFile:0:a:'/home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/harry_potter.html'
-Normalizing filename cases
-Rewriting HTML links
-Parsing harry_potter.html ...
-34% Running transforms on e-book...
-Merging user specified metadata...
-Detecting structure...
-Auto generated TOC with 0 entries.
-Flattening CSS and remapping font sizes...
-Stylesheet 'hp_stylePTMR227080201005.css' referenced by file 'harry_potter.html' not in manifest
-Source base font size is 12.00000pt
-Removing fake margins...
-Found 25 items of level: p_1
-p_1  left margin stats: Counter({'0': 25})
-p_1  right margin stats: Counter({'0': 25})
-Cleaning up manifest...
-Trimming unused files from manifest...
-Creating EPUB Output...
-67% Running EPUB Output plugin
-Splitting markup on page breaks and flow limits, if any...
-	Looking for large trees in harry_potter.html...
-	No large trees found
-Generating default cover
-This EPUB file has no Table of Contents. Creating a default TOC
-EPUB output written to /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/__harry_potter.epub
-Output saved to   /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/__harry_potter.epub
-
-/home/user/.local/lib/python3.12/site-packages/ebooklib/epub.py:1423: FutureWarning: This search incorrectly ignores the root element, and will be fixed in a future version.  If you rely on the current behaviour, change it to './/xmlns:rootfile[@media-type]'
-  for root_file in tree.findall('//xmlns:rootfile[@media-type]', namespaces={'xmlns': NAMESPACES['CONTAINERNS']}):
-******* NOTE: YOU CAN SAFELY IGNORE "Character xx not found in the vocabulary." *******
-Loading TTS xtts model from /home/user/app/models/__sessions/model-381ca24b-82b6-4739-924d-530d5df5cf9e/xtts/richtig_strunk, it takes a while, please be patient...
-convertsion 0.00%:   0% 0/33 [00:00<?, ?step/s]Part 1 containing 33 sentences...
-Computing speaker latents...
-Converting 0.00%:   0% 0/33 [00:38<?, ?step/s] 
-Sentence: Hagrid machte ihnen Tee und bot ihnen Wiesel-Sandwiches an , die sie ablehnten . » Nun , ihr wolltet mich was fragen ? « »
-Converting 0.00%:   3% 1/33 [00:38<20:31, 38.47s/step]Converting 3.03%:   3% 1/33 [01:26<20:31, 38.47s/step]
-Sentence: Ja « , sagte Harry . Es machte keinen Sinn , um den heißen Brei herumzureden . » Wir haben uns gefragt ,
-Converting 3.03%:   6% 2/33 [01:26<22:54, 44.33s/step]Converting 6.06%:   6% 2/33 [01:54<22:54, 44.33s/step]
-Sentence: ob du uns sagen kannst , was den Stein der Weisen außer Fluffy sonst noch schützt . « Hagrid sah ihn missmutig an . »
-Converting 6.06%:   9% 3/33 [01:54<18:24, 36.83s/step]Converting 9.09%:   9% 3/33 [02:39<18:24, 36.83s/step]
-Sentence: Kann ich natürlich nicht « , sagte er . » Erstens weiß ich es selbst nicht . Zweitens wisst ihr schon zu viel ,
-Converting 9.09%:  12% 4/33 [02:39<19:12, 39.74s/step]Converting 12.12%:  12% 4/33 [03:11<19:12, 39.74s/step]
-Sentence: und deshalb würd ich nichts sagen , selbst wenn ich könnte . Der Stein ist aus einem guten Grund hier .
-Converting 12.12%:  15% 5/33 [03:11<17:16, 37.00s/step]Converting 15.15%:  15% 5/33 [03:38<17:16, 37.00s/step]
-Sentence: Aus Gringotts ist er fast gestohlen worden – ich nehm an , das habt ihr auch schon rausgefunden ? Das haut mich allerdings um ,
-Converting 15.15%:  18% 6/33 [03:38<15:10, 33.71s/step]Converting 18.18%:  18% 6/33 [04:17<15:10, 33.71s/step]
-Sentence: dass ihr sogar von Fluffy wisst . « » Ach , hör mal , Hagrid , du willst es uns vielleicht nicht sagen ,
-Converting 18.18%:  21% 7/33 [04:17<15:24, 35.56s/step]Converting 21.21%:  21% 7/33 [04:55<15:24, 35.56s/step]
-Sentence: aber du weißt es , du weißt alles , was hier vor sich geht « , sagte Hermine mit warmer , schmeichelnder Stimme .
-Converting 21.21%:  24% 8/33 [04:55<15:08, 36.32s/step]Converting 24.24%:  24% 8/33 [04:57<15:08, 36.32s/step]
-Sentence: Hagrids Bart zuckte , und sie konnten erkennen , dass er lächelte . » Wir fragen uns nur , wer für die Bewachung verantwortlich war .
-Converting 24.24%:  27% 9/33 [04:57<10:15, 25.64s/step]Converting 27.27%:  27% 9/33 [05:33<10:15, 25.64s/step]
-Sentence: « Hermine drängte weiter . » Wir fragen uns , wem Dumbledore genug Vertrauen entgegenbringt , um ihn um Hilfe zu bitten ,
-Converting 27.27%:  30% 10/33 [05:33<10:57, 28.57s/step]Converting 30.30%:  30% 10/33 [06:19<10:57, 28.57s/step]
-Sentence: abgesehen natürlich von dir . « Bei ihren letzten Worten schwoll Hagrids Brust an . Harry und Ron strahlten zu Hermine hinüber . »
-Converting 30.30%:  33% 11/33 [06:19<12:26, 33.93s/step]Converting 33.33%:  33% 11/33 [06:49<12:26, 33.93s/step]
-Sentence: Nun gut , ich denk nicht , dass es schadet , wenn ich euch das erzähl … lasst mal sehen …
-Converting 33.33%:  36% 12/33 [06:49<11:31, 32.95s/step]Converting 36.36%:  36% 12/33 [07:30<11:31, 32.95s/step]
-Sentence: er hat sich Fluffy von mir geliehen … dann haben ein paar von den Lehrern Zauberbanne drübergelegt … Professor Sprout , Professor Flitwick ,
-Converting 36.36%:  39% 13/33 [07:30<11:46, 35.33s/step]Converting 39.39%:  39% 13/33 [08:18<11:46, 35.33s/step]
-Sentence: Professor McGonagall « , er zählte sie an den Fingern ab , » Professor Quirrell , und Dumbledore selbst hat natürlich auch was unternommen .
-Converting 39.39%:  42% 14/33 [08:18<12:21, 39.04s/step]Converting 42.42%:  42% 14/33 [08:50<12:21, 39.04s/step]
-Sentence: Wartet mal , ich hab jemanden vergessen . Ach ja , Professor Snape . « » Snape ? « » Ja ,
-Converting 42.42%:  45% 15/33 [08:50<11:06, 37.02s/step]Converting 45.45%:  45% 15/33 [09:25<11:06, 37.02s/step]
-Sentence: ihr seid doch nicht etwa immer noch hinter dem her ? Seht mal , Snape hat geholfen , den Stein zu schützen ,
-Converting 45.45%:  48% 16/33 [09:25<10:18, 36.36s/step]Converting 48.48%:  48% 16/33 [10:05<10:18, 36.36s/step]
-Sentence: da wird er ihn doch nicht stehlen wollen . « Harry wusste , dass Ron und Hermine dasselbe dachten wie er . »
-Converting 48.48%:  52% 17/33 [10:05<09:58, 37.42s/step]Converting 51.52%:  52% 17/33 [10:46<09:58, 37.42s/step]
-Sentence: Du bist der Einzige , der weiß , wie man an Fluffy vorbeikommt , nicht wahr , Hagrid ? « , fragte Harry begierig . »
-Converting 51.52%:  55% 18/33 [10:46<09:36, 38.43s/step]Converting 54.55%:  55% 18/33 [11:29<09:36, 38.43s/step]
-Sentence: Und du würdest es niemandem erzählen , oder , nicht mal einem der Lehrer ? « » Kein Mensch weiß es außer mir und Dumbledore «
-Converting 54.55%:  58% 19/33 [11:29<09:17, 39.79s/step]Converting 57.58%:  58% 19/33 [12:09<09:17, 39.79s/step]
-Sentence: , sagte Hagrid stolz . » Nun , das ist schon mal was « , murmelte Harry den andern zu . » Hagrid ,
-Converting 57.58%:  61% 20/33 [12:09<08:39, 39.98s/step]Converting 60.61%:  61% 20/33 [12:36<08:39, 39.98s/step]
-Sentence: könnten wir ein Fenster aufmachen ? Ich komme um vor Hitze . « » Geht nicht , Harry , tut mir leid « ,
-Converting 60.61%:  64% 21/33 [12:36<07:14, 36.20s/step]Converting 63.64%:  64% 21/33 [13:10<07:14, 36.20s/step]
-Sentence: sagte Hagrid . Harry sah , wie er einen Blick zum Feuer warf . Auch Harry sah hinüber . »
-Converting 63.64%:  67% 22/33 [13:10<06:28, 35.29s/step]Converting 66.67%:  67% 22/33 [13:34<06:28, 35.29s/step]
-Sentence: Hagrid – was ist das denn ? « Doch er wusste schon , was es war . Unter dem Kessel ,
-Converting 66.67%:  70% 23/33 [13:34<05:20, 32.03s/step]Converting 69.70%:  70% 23/33 [14:23<05:20, 32.03s/step]
-Sentence: im Herzen des Feuers , lag ein riesiges schwarzes Ei . » Ähem « , brummte Hagrid und fummelte nervös an seinem Bart . »
-Converting 69.70%:  73% 24/33 [14:23<05:35, 37.27s/step]Converting 72.73%:  73% 24/33 [14:50<05:35, 37.27s/step]
-Sentence: Das … ähm … « » Wo hast du es her , Hagrid ? « , sagte Ron und beugte sich über das Feuer ,
-Converting 72.73%:  76% 25/33 [14:50<04:31, 33.99s/step]Converting 75.76%:  76% 25/33 [15:24<04:31, 33.99s/step]
-Sentence: um sich das Ei näher anzusehen . » Es muss dich ein Vermögen gekostet haben . « » Hab’s gewonnen « , sagte Hagrid . »
-Converting 75.76%:  79% 26/33 [15:24<03:57, 33.98s/step]Converting 78.79%:  79% 26/33 [16:00<03:57, 33.98s/step]
-Sentence: Letzte Nacht . War unten im Dorf , hab mir ein oder zwei Gläschen genehmigt und mit ’nem Fremden ein wenig Karten gezockt .
-Converting 78.79%:  82% 27/33 [16:00<03:27, 34.64s/step]Converting 81.82%:  82% 27/33 [16:28<03:27, 34.64s/step]
-Sentence: Glaube , er war ganz froh , dass er es losgeworden ist , um ehrlich zu sein . « »
-Converting 81.82%:  85% 28/33 [16:28<02:43, 32.80s/step]Converting 84.85%:  85% 28/33 [17:02<02:43, 32.80s/step]
-Sentence: Aber was fängst du damit an , wenn es ausgebrütet ist ? « , fragte Hermine . » Na ja ,
-Converting 84.85%:  88% 29/33 [17:02<02:11, 32.98s/step]Converting 87.88%:  88% 29/33 [17:33<02:11, 32.98s/step]
-Sentence: ich hab ’n bisschen was gelesen « , sagte Hagrid und zog ein großes Buch unter seinem Kissen hervor . »
-Converting 87.88%:  91% 30/33 [17:33<01:37, 32.56s/step]Converting 90.91%:  91% 30/33 [18:11<01:37, 32.56s/step]
-Sentence: Aus der Bibliothek – Drachenzucht für Haus und Hof – ist ein wenig veraltet , klar , aber da steht alles drin .
-Converting 90.91%:  94% 31/33 [18:11<01:08, 34.17s/step]Converting 93.94%:  94% 31/33 [18:50<01:08, 34.17s/step]
-Sentence: Sind selten , die Stachelbuckel . « Hagrid sah sehr zufrieden aus ; Hermine allerdings nicht . » Hagrid , du lebst in einer Holzhütte «
-Converting 93.94%:  97% 32/33 [18:50<00:35, 35.66s/step]Converting 96.97%:  97% 32/33 [19:18<00:35, 35.66s/step]
-Sentence: , sagte sie . Doch er hörte sie nicht . Vergnügt summend stocherte er im Feuer herum
-Converting 96.97%: 100% 33/33 [19:18<00:00, 33.18s/step]
-End of Part 1
-********* Combined part audio file saved to /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/chapters/chapter_1.flac
-Combining part 1 to audio, sentence 0 to 32
-Converting 96.97%: 100% 33/33 [19:28<00:00, 35.40s/step]
-['chapter_1.flac']
-************ DYNAMIC BATCH SIZE SET TO 670 ******************
-********* total audio parts saved to /home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/Harry Potter - und der Stein der Weisen - Kapitel 14.flac
-ffmpeg version 5.1.6-0+deb12u1 Copyright (c) 2000-2024 the FFmpeg developers
-  built with gcc 12 (Debian 12.2.0-14)
-  configuration: --prefix=/usr --extra-version=0+deb12u1 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --enable-gnutls --enable-ladspa --enable-libaom --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libjack --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-libpulse --enable-librabbitmq --enable-librist --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-libzmq --enable-libzvbi --enable-lv2 --enable-omx --enable-openal --enable-opencl --enable-opengl --enable-sdl2 --disable-sndio --enable-libjxl --enable-pocketsphinx --enable-librsvg --enable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-libx264 --enable-libplacebo --enable-librav1e --enable-shared
-  libavutil      57. 28.100 / 57. 28.100
-  libavcodec     59. 37.100 / 59. 37.100
-  libavformat    59. 27.100 / 59. 27.100
-  libavdevice    59.  7.100 / 59.  7.100
-  libavfilter     8. 44.100 /  8. 44.100
-  libswscale      6.  7.100 /  6.  7.100
-  libswresample   4.  7.100 /  4.  7.100
-  libpostproc    56.  6.100 / 56.  6.100
-Input #0, flac, from '/home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/Harry Potter - und der Stein der Weisen - Kapitel 14.flac':
-  Metadata:
-    encoder         : Lavf59.27.100
-  Duration: 00:03:27.70, start: 0.000000, bitrate: 214 kb/s
-  Stream #0:0: Audio: flac, 24000 Hz, mono, s16
-Input #1, ffmetadata, from '/home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/metadata.txt':
-  Metadata:
-    title           : Harry Potter - und der Stein der Weisen - Kapitel 14
-    year            : 2025
-  Duration: 00:03:27.70, start: 0.000000, bitrate: 0 kb/s
-  Chapters:
-    Chapter #1:0: start 0.000000, end 207.701000
-      Metadata:
-        title           : Part 1
-Input #2, image2, from '/home/user/app/tmp/ebook-381ca24b-82b6-4739-924d-530d5df5cf9e/859a143594d74837c4ed6339b2878c87/harry_potter.jpg':
-  Duration: 00:00:00.04, start: 0.000000, bitrate: 18005 kb/s
-  Stream #2:0: Video: mjpeg (Baseline), yuvj420p(pc, bt470bg/unknown/unknown), 1200x1600 [SAR 96:96 DAR 3:4], 25 fps, 25 tbr, 25 tbn
-Stream mapping:
-  Stream #0:0 -> #0:0 (flac (native) -> aac (native))
-  Stream #2:0 -> #0:1 (copy)
-Press [q] to stop, [?] for help
-Output #0, ipod, to '/home/user/app/audiobooks/gui/host/web-381ca24b-82b6-4739-924d-530d5df5cf9e/Harry_Potter_-_und_der_Stein_der_Weisen_-_Kapitel_14.m4b':
-  Metadata:
-    title           : Harry Potter - und der Stein der Weisen - Kapitel 14
-    year            : 2025
-    encoder         : Lavf59.27.100
-  Chapters:
-    Chapter #0:0: start 0.000000, end 207.701000
-      Metadata:
-        title           : Part 1
-  Stream #0:0: Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, mono, fltp, 128 kb/s
-    Metadata:
-      encoder         : Lavc59.37.100 aac
-  Stream #0:1: Video: mjpeg (Baseline), yuvj420p(pc, bt470bg/unknown/unknown), 1200x1600 [SAR 96:96 DAR 3:4], q=2-31, 25 fps, 25 tbr, 12800 tbn (attached pic)
-frame=    0 fps=0.0 q=-1.0 size=       0kB time=00:00:00.00 bitrate=N/A speed=   0x    
-frame=    1 fps=0.0 q=-1.0 size=       0kB time=00:00:21.94 bitrate=   0.0kbits/s speed=43.7x    
-frame=    1 fps=1.0 q=-1.0 size=     512kB time=00:00:44.48 bitrate=  94.3kbits/s speed=44.4x    
-frame=    1 fps=0.7 q=-1.0 size=     768kB time=00:01:08.17 bitrate=  92.3kbits/s speed=45.3x    
-frame=    1 fps=0.5 q=-1.0 size=    1024kB time=00:01:31.23 bitrate=  92.0kbits/s speed=45.5x    
-frame=    1 fps=0.4 q=-1.0 size=    1536kB time=00:01:55.40 bitrate= 109.0kbits/s speed=46.1x    
-frame=    1 fps=0.3 q=-1.0 size=    1792kB time=00:02:18.36 bitrate= 106.1kbits/s speed=46.1x    
-frame=    1 fps=0.3 q=-1.0 size=    2304kB time=00:02:42.37 bitrate= 116.2kbits/s speed=46.3x    
-frame=    1 fps=0.2 q=-1.0 size=    2560kB time=00:03:05.38 bitrate= 113.1kbits/s speed=46.3x    
-[ipod @ 0x55bcecb70100] Starting second pass: moving the moov atom to the beginning of the file
-frame=    1 fps=0.2 q=-1.0 Lsize=    3364kB time=00:03:27.70 bitrate= 132.7kbits/s speed=46.2x    
-video:88kB audio:3240kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 1.095480%
-[aac @ 0x55bcecb97240] Qavg: 1915.216
-
-*********** Session: 381ca24b-82b6-4739-924d-530d5df5cf9e **************
-Store it in case of interruption, crash, reuse of custom model or custom voice,
-you can resume the conversion with --session option

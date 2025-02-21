@@ -3,6 +3,7 @@ import logging
 import os
 import urllib.parse
 import apprise
+from load_config import GlobalConfig
 
 
 
@@ -39,18 +40,20 @@ def send_ntfy_notification(config, container_name, message, keyword=None, file_n
     """
     Sendet eine Benachrichtigung an den ntfy-Server.
     """
-    ntfy_url = config["notifications"]["ntfy"]["url"]
-    ntfy_token = config["notifications"]["ntfy"]["token"]
+    
+    ntfy_url = config.notifications.ntfy.url
+    ntfy_token = config.notifications.ntfy.token.get_secret_value()
 
-    if isinstance(config.get("containers").get(container_name, {}), dict):
-        ntfy_topic = config.get("containers", {}).get(container_name, {}).get("ntfy_topic") or config["notifications"].get("ntfy", {}).get("topic", "")
-        ntfy_tags = config.get("containers", {}).get(container_name, {}).get("ntfy_tags") or config["notifications"].get("ntfy", {}).get("tags", "warning")
-        ntfy_priority = config.get("containers", {}).get(container_name, {}).get("ntfy_priority") or config["notifications"].get("ntfy", {}).get("priority", "3")
 
+    if container_name in [c for c in config.containers]:
+        ntfy_topic = config.containers[container_name].ntfy_topic or config.notifications.ntfy.topic
+        ntfy_tags = config.containers[container_name].ntfy_tags or config.notifications.ntfy.tags
+        ntfy_priority = config.containers[container_name].ntfy_priority or config.notifications.ntfy.priority
     else:
-        ntfy_topic=  config["notifications"].get("ntfy", {}).get("topic", "")
-        ntfy_tags = config["notifications"].get("ntfy", {}).get("tags", "warning")
-        ntfy_priority = config["notifications"].get("ntfy", {}).get("priority", "warning")
+        ntfy_topic = config.notifications.ntfy.topic
+        ntfy_tags = config.notifications.ntfy.tags
+        ntfy_priority = config.notifications.ntfy.priority
+
 
     if not ntfy_url or not ntfy_topic or not ntfy_token:
         logging.error("Ntfy-Konfiguration fehlt. Benachrichtigung nicht möglich.")
@@ -107,12 +110,12 @@ def send_ntfy_notification(config, container_name, message, keyword=None, file_n
 
 
 def send_notification(config, container_name, message, keyword=None, file_name=None):
-    ntfy_url = config["notifications"]["ntfy"]["url"]
-    ntfy_token = config["notifications"]["ntfy"]["token"]
+    ntfy_url = config.notifications.ntfy.url
+    ntfy_token = config.notifications.ntfy.token
     if ntfy_url and ntfy_token:
         send_ntfy_notification(config, container_name, message, keyword, file_name)
 
-    apprise_url = config["notifications"]["apprise"]["url"]
+    apprise_url = config.notifications.apprise.url.get_secret_value()
     if apprise_url:
         send_apprise_notification(apprise_url, container_name, message, keyword, file_name)
 
