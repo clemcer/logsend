@@ -10,6 +10,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from notifier import send_notification
 from line_processor import LogProcessor
+from load_config import
 
 
 shutdown_event = threading.Event()

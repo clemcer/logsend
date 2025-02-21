@@ -5,7 +5,7 @@ from pydantic import (
     field_validator,
     model_validator,
     ConfigDict,
-    ValidationError
+    
 )
 from typing import Dict, List, Optional, Union
 import os
@@ -13,46 +13,56 @@ from typing import Dict, Union
 import logging
 import yaml
 
-log_level = "INFO"
-logging.getLogger().handlers.clear()
-logging.basicConfig(
-    level = getattr(logging, log_level.upper(), logging.INFO),
-    # level = "DEBUG",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("monitor.log", mode="w"),
-        logging.StreamHandler()
-    ]
-)
+logging.getLogger(__name__)
 
+""" 
+THIS MAY LOOK UNNECESSARY COMPLICATED BUT I WANTED TO USE AND LEARN PYDANTIC 
+I DIDN'T FIND A BUILT IN PYDANTIC SOLUTION FOR USING ENVIRONMENT VARIABLES TO OVERRIDE YAML VALUES WHILE KEEPING DEFAULT VALUES 
+SO FIRST I LOAD THE YAML AND THE ENVIRONMENT VARIABLES, THEN I MERGE THEM AND THEN I VALIDATE THE DATA WITH PYDANTIC
+ """
 
-# region Pydantic Models
 class NtfyConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_default=True)
 
     url: str = Field(..., description="Ntfy server URL")
     topic: str = Field(..., description="Ntfy topic name")
-    token: Optional[str] = Field(None, description="Optional access token")
-    priority: str = Field("3", description="Message priority 1-5")
+    token: str = Field(default=None, description="Optional access token")
+    priority: Union[str, int] = Field(default=3, description="Message priority 1-5")
     tags: str = Field("kite,mag", description="Comma-separated tags")
 
     @field_validator("priority")
     def validate_priority(cls, v):
-        if not 1 <= int(v) <= 5:
-            raise ValueError("Priority must be between 1-5")
+        if isinstance(v, int):
+            if not 1 <= int(v) <= 5:
+                raise ValueError("Priority must be between 1-5")
+        if isinstance(v, str):
+            options = ["max", "urgent", "high", "default", "low", "min"]
+            if v not in options:
+                raise ValueError(f"Priority must be one of {options}")
         return v
 
 class AppriseConfig(BaseModel):  
     model_config = ConfigDict(extra="forbid", validate_default=True)
-  
     url: str = Field(..., description="Apprise compatible URL")
 
-class ContainerConfig(BaseModel):
-    model_config = ConfigDict(extra="ignore", validate_default=True)
+class NotificationsConfig(BaseModel):
+    ntfy: Optional[NtfyConfig] = Field(default=None, validate_default=False)
+    apprise: Optional[AppriseConfig] = Field(default=None, validate_default=False)
 
-    ntfy_tags: Optional[str] = None
+    @model_validator(mode="after")
+    def check_at_least_one(self) -> "NotificationsConfig":
+        if self.ntfy is None and self.apprise is None:
+            raise ValueError("Mindestens eine Konfiguration (apprise oder ntfy) muss angegeben werden.")
+        return self
+    
+
+
+class ContainerConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid", validate_default=True)
+
+    ntfy_tags: Optional[str] = Field(default=None, validate_default=False) 
     ntfy_topic: Optional[str] = None
-    ntfy_priority: Optional[str] = None
+    ntfy_priority: Optional[int] = None
     attachment_lines: Optional[int] = None
     keywords: List[Union[str, Dict[str, str]]] = []
     keywords_with_attachment: List[str] = []
@@ -62,6 +72,17 @@ class ContainerConfig(BaseModel):
         if v and not 1 <= int(v) <= 5:
             raise ValueError("Ntfy piority must be between 1-5")
         return v
+    
+    # @model_validator(mode="before")
+    # def transform_legacy_format(cls, values):
+    #     # Convert legacy keyword list format
+    #     if isinstance(values.get("global_keywords"), list):
+    #         values[] = {
+    #             "keywords": values["global_keywords"],
+    #             "keywords_with_attachment": []
+    #         }
+        
+    #     return values
 
 class GlobalKeywords(BaseModel):
     keywords: List[str] = []
@@ -79,14 +100,14 @@ class Settings(BaseModel):
     disable_restart_message: bool = Field(False, description="Disable config reload notification")
 
 
+
 class GlobalConfig(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
         validate_default=True
     )
-    containers: Dict[str, Optional[Union[ContainerConfig, List]]]
-
-    notifications: Dict[str, Union[NtfyConfig, AppriseConfig]]
+    containers: Dict[str, ContainerConfig]
+    notifications: NotificationsConfig
     global_keywords: GlobalKeywords
     settings: Settings
 
@@ -97,7 +118,13 @@ class GlobalConfig(BaseModel):
             values["containers"] = {
                 name: {} for name in values["containers"]
             }
-        
+         # Convert legacy keywords format per container
+        for container in values.get("containers"):
+            if isinstance(values.get("containers").get(container), list):
+                values["containers"][container] = {
+                    "keywords": values["containers"][container],
+                    "keywords_with_attachment": []
+                }
         # Convert legacy global_keywords format
         if isinstance(values.get("global_keywords"), list):
             values["global_keywords"] = {
@@ -107,61 +134,80 @@ class GlobalConfig(BaseModel):
         
         return values
 
-
-def load_config():
-    """
-    Load config from config.yaml or override with environment variables
-    """
-    config = {}
-    
-    try:
-        with open("/data/clems/Meine Dateien/PROJECTS/loggify/app/config.yaml", "r") as file:
-            config = yaml.safe_load(file)
-            logging.info("Konfigurationsdatei erfolgreich geladen.")
-    except FileNotFoundError:
-        logging.warning("config.yaml nicht gefunden. Verwende nur Umgebungsvariablen.")
-    return config
-
-
 def merge_yaml_and_env(yaml, env_update):
-    
     for key, value in env_update.items():
         if isinstance(value, dict) and key in yaml:
             merge_yaml_and_env(yaml[key],value)
         else:
-            if value:
+            if value is not None:
                 yaml[key] = value
     return yaml
 
-os.environ["NTFY_URL"] = "ENV_URL"
 
-env_config = {
-    "notifications": {
-        "ntfy": {
-            "url": os.getenv("NTFY_URL"),
-            "topic": os.getenv("NTFY_TOPIC"),
-            "token": os.getenv("NTFY_TOKEN"),
-            "priority": os.getenv("NTFY_PRIORITY"),
-            "tags": os.getenv("NTFY_TAGS"),
-        },
-        "apprise": {
-            "url": os.getenv("APPRISE_URL")
+
+
+def load_config():
+    yaml_config = {}
+    try:
+        with open("/data/clems/Meine Dateien/PROJECTS/loggify/app/config.yaml", "r") as file:
+            yaml_config = yaml.safe_load(file)
+            logging.info("Konfigurationsdatei erfolgreich geladen.")
+    except FileNotFoundError:
+        logging.warning("config.yaml nicht gefunden. Verwende nur Umgebungsvariablen.")
+    """
+    -------------------------LOAD ENVIRONMENT VARIABLES---------------------
+    """
+    env_config = { "notifications": {}, "settings": {}}
+    settings_values = {
+        "log_level": os.getenv("LOG_LEVEL"),
+        "attachment_lines": os.getenv("ATTACHMENT_LINES"),
+        "multi_line_entries": os.getenv("MULTI_LINE_ENTRIES"),
+        "notification_cooldown": os.getenv("NOTIFICATION_COOLDOWN"),
+        "disable_restart": os.getenv("DISABLE_RESTART"),
+        "disable_start_message": os.getenv("DISABLE_START_MESSAGE"),
+        "disable_restart_message": os.getenv("DISABLE_RESTART_MESSAGE"),
+        "disable_shutdown_message": os.getenv("DISABLE_SHUTDOWN_MESSAGE")
+        } 
+    ntfy_values =  {
+        "url": os.getenv("NTFY_URL"),
+        "topic": os.getenv("NTFY_TOPIC"),
+        "token": os.getenv("NTFY_TOKEN"),
+        "priority": os.getenv("NTFY_PRIORITY"),
+        "tags": os.getenv("NTFY_TAGS"),
         }
+    apprise_values = {
+        "url": os.getenv("APPRISE_URL")
     }
-}
+    if any(ntfy_values.values()):
+        env_config["notifications"]["ntfy"] = ntfy_values
+    if apprise_values["url"]: 
+        env_config["notifications"]["apprise"] = apprise_values
+    for key, value in settings_values.items(): 
+        if value is not None:
+            env_config["settings"][key] = value
+
+    
+    print(f"\nYAML: {yaml_config}\n")
+
+    merged_config = merge_yaml_and_env(yaml_config, env_config)
+    print(f"\nENV: {env_config}\n")
+
+    print(f"\nMERGED: {merged_config}\n")
+
+    config = GlobalConfig.model_validate(merged_config)
+    return config
 
 
+# os.environ["NTFY_URL"] = "ENV_URL"
+os.environ["LOG_LEVEL"] = "ERROR"
 
-yaml_config = load_config()
-print()
-print(yaml_config)
-print(f"\n\n-------------------")
+if __name__ == "__main__":
 
-merged_config = merge_yaml_and_env(yaml_config, env_config)
-
-print(merged_config)
-print(f"\n\n-------------------")
+    print(f"\n\n-------------------")
 
 
-config = GlobalConfig.model_validate(merged_config)
-print(config.model_dump_json(indent=2))
+    config = load_config()
+    print(config.model_dump_json(indent=2))
+
+    print(hasattr(config.containers["audiobookshelf"], "ntfy_topic"))
+    print(config.containers)
