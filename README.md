@@ -3,7 +3,7 @@
 <br />
 <div align="center">
   <a href="clemcer/loggifly">
-    <img src="/images/icon.png" alt="Logo" width="300" height="auto">
+    <img src="/images/icon.png" alt="Logo" width="200" height="auto">
   </a>
 
 <h1 align="center">LoggiFly</h1>
@@ -266,9 +266,9 @@ Except for container specific settings and regex patterns you can configure most
 3. **Troubleshooting Multi-Line Logs**. If multi-line entries aren't detected:
     - Wait for Patterns: LoggiFly needs a few lines to detect the pattern the log entries start with (e.g. timestamps/log formats)
     - Unrecognized Patterns: If issues persist, open an issue and share the affected log samples
-4. **Test Regex Patterns**: Validate patterns at [regex101.com](https://regex101.com) before adding them to config.
+4. **Test Regex Patterns**: Validate patterns at [regex101.com](https://regex101.com) before adding them to your config.
 Example for error detection:
-`regex: "\b(ERROR|CRITICAL)\b`
+`regex: \b(ERROR|CRITICAL)\b`
 ---
 
 ## License
