@@ -28,6 +28,9 @@ Never miss critical container events again - Get instant alerts for security bre
 - ✅ Monitoring custom app behaviors (e.g., when a user downloads an audiobook on your Audiobookshelf server)
 ---
 
+<div align="center">
+   <img src="/images/vault_failed_login.gif" alt="Failed Vaultwarden Login" width="auto" height="150">
+</div>
 
 
 
