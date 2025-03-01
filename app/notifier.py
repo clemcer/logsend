@@ -55,7 +55,7 @@ def send_ntfy_notification(config, container_name, message, keyword=None, file_n
 
     headers = {
         "Tags": f"{ntfy_tags}",
-        "Icon": "https://raw.githubusercontent.com/clemcer/loggifly/refs/heads/main/images/icon.png?token=GHSAT0AAAAAAC5ITTW6I3YWV34EPLEXYUD4Z6AI3PA",
+        "Icon": "https://raw.githubusercontent.com/clemcer/loggifly/main/images/icon.png",
         "Priority": f"{ntfy_priority}"
     }
     if config.notifications.ntfy.token:
