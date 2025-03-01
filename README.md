@@ -76,10 +76,10 @@ services:
       NTFY_TOPIC: 
       NTFY_TOKEN:                            # In case you need authentication
       APPRISE_URL:                           # Any Apprise-compatible URL (https://github.com/caronc/apprise/wiki)
-      CONTAINERS: vaultwarden,audiobookshelf # comma separated list
-      GLOBAL_KEYWORDS: login,error           # comma separated list
+      CONTAINERS:                            # comma separated list, e.g., vaultwarden,audiobookshelf
+      GLOBAL_KEYWORDS:                       # comma separated list, e.g., login,error
       # When one of these keywords is found a log file will be attached to the notification
-      GLOBAL_KEYWORDS_WITH_ATTACHMENT: critical,warning 
+      GLOBAL_KEYWORDS_WITH_ATTACHMENT:       #comma separated list, e.g., critical,warning 
 ```
 </details>
 
@@ -117,9 +117,9 @@ global_keywords:
 notifications:     
   # Configure either Ntfy or Apprise or both
   ntfy:
-    url: "http://your-ntfy-server"  
-    topic: "loggifly"                   
-    token: "ntfy-token"          
+    url: http://your-ntfy-server  
+    topic: loggifly                   
+    token: ntfy-token               # In case you need authentication
   apprise:
     url: "discord://webhook-url"    # Any Apprise-compatible URL (https://github.com/caronc/apprise/wiki)```    
 ```
@@ -172,7 +172,7 @@ notifications:
   ntfy:
     url: http://your-ntfy-server    # Required. The URL of your Ntfy instance
     topic: loggifly.                # Required. the topic for Ntfy
-    token: ntfy-token               # In case you need authorization 
+    token: ntfy-token               # In case you need authentication 
     priority: 3                     # Ntfy priority (1-5)
     tags: kite,mag                  # Ntfy tags/emojis 
   apprise:
