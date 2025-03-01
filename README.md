@@ -26,13 +26,13 @@ Never miss critical container events again - Get instant alerts for security bre
 - ✅ Catching security breaches (e.g., failed logins in Vaultwarden)
 - ✅ Debugging crashes with attached log context
 - ✅ Monitoring custom app behaviors (e.g., when a user downloads an audiobook on your Audiobookshelf server)
----
+
 
 <div align="center">
    <img src="/images/vault_failed_login.gif" alt="Failed Vaultwarden Login" width="auto" height="150">
 </div>
 
-
+---
 
 ## Content
 
