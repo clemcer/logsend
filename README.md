@@ -40,6 +40,8 @@ Never miss critical container events again - Get instant alerts for security bre
 - [Screenshots](#-screenshots)
 - [Quick Start](#️-quick-start)
 - [Configuration Deep Dive](#-Configuration-Deep-Dive)
+  - [Basic config structure](#-basic-structure)
+  - [Environment Variables](#-enviroment-variables)
 - [Tips](#-tips)
 
 ---
