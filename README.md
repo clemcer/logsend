@@ -239,6 +239,7 @@ global_keywords:
 
 ### 🍀 Enviroment Variables
 
+
 Except for container specific settings and regex patterns you can configure most settings via docker environment variables in either your docker compose or an .env file
 
 <details><summary><em>Click to expand:</em><strong> Enviroment Variables </strong></summary><br>
