@@ -20,9 +20,6 @@
 **LoggiFly** - A Lightweight Tool to monitor Docker Logs and send Notifications. <br>
 Never miss critical container events again - Get instant alerts for security breaches, system errors, or custom patterns through your favorite notification channels. 🚀
 
-<div align="left">
-   <img src="/images/vault_failed_login.gif" alt="Failed Vaultwarden Login" width="300" height="auto">
-</div>
 
 
 **Ideal For**:
@@ -30,6 +27,12 @@ Never miss critical container events again - Get instant alerts for security bre
 - ✅ Debugging crashes with attached log context
 - ✅ Monitoring custom app behaviors (e.g., when a user downloads an audiobook on your Audiobookshelf server)
 ---
+
+<div align="left">
+   <img src="/images/vault_failed_login.gif" alt="Failed Vaultwarden Login" width="300" height="auto">
+</div>
+
+
 
 ## Content
 
