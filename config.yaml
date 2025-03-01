@@ -1,25 +1,26 @@
-containers:
-    vaultwarden:
-    # The next 5 settings override the global settings for this container.
-      ntfy_tags: closed_lock_with_key  
-      ntfy_priority: 5
-      ntfy_topic: security
-      attachment_lines: 20     
-      notification_cooldown: 10  
-      keywords:
-        - regex: (username|password).*incorrect   # Use regex expressions when you need them
-        - login
-      keywords_with_attachment:                   # send a file with the last log lines. 
-        - critical
+containers:        
     audiobookshelf:
       keywords:
         - requested download
         - failed login
-
-    # Just leave the them blank if global keywords are enough
+        
+    vaultwarden:
+    # The next 5 settings override the global settings only for this container.
+      ntfy_tags: closed_lock_with_key   
+      ntfy_priority: 5
+      ntfy_topic: security
+      attachment_lines: 50     
+      notification_cooldown: 2  
+      
+      keywords:
+        - login
+        - regex: (username|password).*incorrect   # Use regex expressions when you need them
+      keywords_with_attachment:                    
+        - critical
+    
+    # Just leave the containers blank if global keywords are enough
     nextcloud:
     immich_server:
-
 
 global_keywords:
   keywords:
@@ -32,13 +33,14 @@ notifications:
   # At least one of the two (Ntfy/Apprise) is required.
   ntfy:
     url: http://your-ntfy-server    # Required. The URL of your Ntfy instance
-    topic: loggifly.                # Required. the topic for Ntfy
-    token: ntfy-token               # In case you need authorization 
+    topic: loggifly                 # Required. the topic for Ntfy
+    token: ntfy-token               # In case you need authentication 
     priority: 3                     # Ntfy priority (1-5)
     tags: kite,mag                  # Ntfy tags/emojis 
   apprise:
     url: "discord://webhook-url"    # Any Apprise-compatible URL (https://github.com/caronc/apprise/wiki)
   
+# settings are optional because they all have default values
 settings:          
   log_level: INFO               # DEBUG, INFO, WARNING, ERROR
   notification_cooldown: 5      # Seconds between alerts for same keyword (per container)
