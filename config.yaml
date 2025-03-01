@@ -24,7 +24,6 @@ containers:
 
 global_keywords:
   keywords:
-    - segfault
     - panic
   keywords_with_attachment:
     - fatal
